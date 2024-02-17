@@ -1,16 +1,25 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
+import { Shadow } from "react-native-shadow-2";
 export default function App() {
+    var width = Dimensions.get("window").width;
+    var height = Dimensions.get("window").height;
     return (
         <View style={styles.container}>
             <Text style={styles.header}>MoonChart</Text>
-            <StockCard content="Apple Aktie" />
-            <StockCard content="Amazon Aktie" />
-            <StockCard content="Nike Aktie" />
+            <ScrollView
+                style={{ flex: 1, width: width }}
+                contentContainerStyle={{ alignItems: "center" }}
+            >
+                <StockCard content="Apple Aktie" />
+
+                <StockCard content="Amazon Aktie" />
+                <StockCard content="Nike Aktie" />
+            </ScrollView>
         </View>
     );
 }
@@ -18,9 +27,9 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "grey",
+        backgroundColor: "white",
         alignItems: "center",
-        justifyContent: "flex-start",
+        //justifyContent: "flex-start",
     },
     header: {
         padding: 40,
