@@ -6,26 +6,19 @@ import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 export default function App() {
     return (
-        <LinearGradient
-            // Background Linear Gradient
-            colors={[Colors.BLACK, Colors.PURPLE]}
-            style={{ flex: 1 }}
-            locations={[0.6, 0.8]}
-        >
-            <View style={styles.container}>
-                <Text style={styles.header}>MoonChart</Text>
-                <StockCard content="Apple Aktie" />
-                <StockCard content="Amazon Aktie" />
-                <StockCard content="Nike Aktie" />
-            </View>
-        </LinearGradient>
+        <View style={styles.container}>
+            <Text style={styles.header}>MoonChart</Text>
+            <StockCard content="Apple Aktie" />
+            <StockCard content="Amazon Aktie" />
+            <StockCard content="Nike Aktie" />
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        //backgroundColor: Colors.BLACK,
+        backgroundColor: "grey",
         alignItems: "center",
         justifyContent: "flex-start",
     },
