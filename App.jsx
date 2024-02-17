@@ -1,10 +1,18 @@
 import { StatusBar } from "expo-status-bar";
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+    Dimensions,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 import { Shadow } from "react-native-shadow-2";
+import { FontAwesome } from "@expo/vector-icons";
 export default function App() {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
@@ -16,10 +24,12 @@ export default function App() {
                 contentContainerStyle={{ alignItems: "center" }}
             >
                 <StockCard content="Apple Aktie" />
-
                 <StockCard content="Amazon Aktie" />
                 <StockCard content="Nike Aktie" />
             </ScrollView>
+            <TouchableOpacity style={styles.floatingSearchButton}>
+                <FontAwesome name="search" size={24} color="white" />
+            </TouchableOpacity>
         </View>
     );
 }
@@ -36,5 +46,14 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: "bold",
         color: Colors.FROST_WHITE,
+    },
+    floatingSearchButton: {
+        position: "absolute",
+        bottom: 10,
+        right: 15,
+        backgroundColor: "black",
+        padding: 20,
+        borderRadius: 100,
+        textAlign: "center",
     },
 });
