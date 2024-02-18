@@ -14,7 +14,6 @@
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
     "react-native": "0.73.4",
-    "react-native-shadow-2": "^7.0.8",
     "react-native-svg": "^14.1.0",
     "react-native-svg-charts": "^5.4.0"
   },

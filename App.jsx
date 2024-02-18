@@ -11,8 +11,9 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
-import { Shadow } from "react-native-shadow-2";
 import { FontAwesome } from "@expo/vector-icons";
+import getCurrentPrice, { getHistory } from "./scripts/crypto.js";
+
 export default function App() {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;

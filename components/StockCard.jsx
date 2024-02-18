@@ -10,7 +10,6 @@ import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid } from "react-native-svg-charts";
 import * as shape from "d3-shape";
-import { Shadow } from "react-native-shadow-2";
 
 export default function StockCard({ content }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
