@@ -12,11 +12,19 @@ import { LinearGradient } from "expo-linear-gradient";
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 import { FontAwesome } from "@expo/vector-icons";
-import getCurrentPrice, { getHistory } from "./scripts/crypto.js";
+import getCurrentPrice, { getHistory } from "./scripts/Crypto.js";
+import { useState } from "react";
 
 export default function App() {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
+    const [shareList, setShareList] = useState([
+        {
+            id: "bitcoin",
+            type: "crypto",
+            value: 0,
+        },
+    ]);
     return (
         <View style={styles.container}>
             <Text style={styles.header}>MoonChart</Text>
@@ -24,7 +32,7 @@ export default function App() {
                 style={{ flex: 1, width: width }}
                 contentContainerStyle={{ alignItems: "center" }}
             >
-                <StockCard content="Apple Aktie" />
+                <StockCard content="Apple Aktie" share_object={shareList[0]} />
                 <StockCard content="Amazon Aktie" />
                 <StockCard content="Nike Aktie" />
             </ScrollView>

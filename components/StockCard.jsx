@@ -10,14 +10,21 @@ import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid } from "react-native-svg-charts";
 import * as shape from "d3-shape";
+import getCurrentPrice from "../scripts/Crypto.js";
 
-export default function StockCard({ content }) {
+export default function StockCard({ content, share_object }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
-
+    const [shareObject, setShareObject] = useState(share_object);
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
+    if (share_object) {
+        getCurrentPrice({ coin_id: share_object.id }).then(
+            (response) => (setShareObject.value = response.shareObject.id.eur)
+        );
+        console.log(shareObject.value);
+    }
     return (
         <>
             <Pressable onPress={toggleExpanded} style={styles.outline}>
@@ -25,7 +32,12 @@ export default function StockCard({ content }) {
                     {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
                     <Text style={styles.header}>{content}</Text>
                     <View style={styles.itemsRight}>
-                        <Text style={styles.value}>180€</Text>
+                        {!shareObject && <Text style={styles.value}>180€</Text>}
+                        {shareObject && (
+                            <Text style={styles.value}>
+                                {shareObject.value}
+                            </Text>
+                        )}
                         <AntDesign
                             name="plussquareo"
                             size={24}
