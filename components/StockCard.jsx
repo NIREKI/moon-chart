@@ -9,7 +9,7 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid } from "react-native-svg-charts";
-import getCurrentPrice from "../scripts/Crypto.js";
+import getCurrentPrice, { getHistory } from "../scripts/Crypto.js";
 
 export default function StockCard({ content, share_object }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
@@ -20,15 +20,19 @@ export default function StockCard({ content, share_object }) {
         setExpanded(!expanded);
     };
     useEffect(() => {
-        if (share_object) {
-            let id = share_object.id;
-            let data = getCurrentPrice({ coin_id: id });
-            let tempObj = shareObject;
-            tempObj.value = data[id].eur;
-            setShareObject(tempObj);
-            console.log(shareObject.value);
-            setLoading(true);
+        async function getData() {
+            if (share_object) {
+                let id = share_object.id;
+                let data = await getCurrentPrice({ coin_id: id });
+                let tempObj = shareObject;
+                tempObj.value = data[id].eur;
+                setShareObject(tempObj);
+                console.log(shareObject.value);
+                setLoading(true);
+                //getHistory({ coin_id: id });
+            }
         }
+        getData();
     }, []);
     return (
         <>
@@ -37,7 +41,9 @@ export default function StockCard({ content, share_object }) {
                     {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
                     <Text style={styles.header}>{content}</Text>
                     <View style={styles.itemsRight}>
-                        {!shareObject && <Text style={styles.value}>180€</Text>}
+                        {!shareObject && (
+                            <Text style={styles.value}>Not available.</Text>
+                        )}
                         {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
                         {shareObject && loading && (
                             <Text style={styles.value}>
