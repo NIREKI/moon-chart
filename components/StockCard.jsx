@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Pressable,
     StyleSheet,
@@ -9,22 +9,27 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid } from "react-native-svg-charts";
-import * as shape from "d3-shape";
 import getCurrentPrice from "../scripts/Crypto.js";
 
 export default function StockCard({ content, share_object }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
     const [shareObject, setShareObject] = useState(share_object);
+    const [loading, setLoading] = useState(false);
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
-    if (share_object) {
-        getCurrentPrice({ coin_id: share_object.id }).then(
-            (response) => (setShareObject.value = response.shareObject.id.eur)
-        );
-        console.log(shareObject.value);
-    }
+    useEffect(() => {
+        if (share_object) {
+            let id = share_object.id;
+            let data = getCurrentPrice({ coin_id: id });
+            let tempObj = shareObject;
+            tempObj.value = data[id].eur;
+            setShareObject(tempObj);
+            console.log(shareObject.value);
+            setLoading(true);
+        }
+    }, []);
     return (
         <>
             <Pressable onPress={toggleExpanded} style={styles.outline}>
@@ -33,9 +38,10 @@ export default function StockCard({ content, share_object }) {
                     <Text style={styles.header}>{content}</Text>
                     <View style={styles.itemsRight}>
                         {!shareObject && <Text style={styles.value}>180€</Text>}
-                        {shareObject && (
+                        {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
+                        {shareObject && loading && (
                             <Text style={styles.value}>
-                                {shareObject.value}
+                                {shareObject.value + "€"}
                             </Text>
                         )}
                         <AntDesign

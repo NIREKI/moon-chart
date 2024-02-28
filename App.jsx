@@ -32,9 +32,9 @@ export default function App() {
                 style={{ flex: 1, width: width }}
                 contentContainerStyle={{ alignItems: "center" }}
             >
-                <StockCard content="Apple Aktie" share_object={shareList[0]} />
-                <StockCard content="Amazon Aktie" />
-                <StockCard content="Nike Aktie" />
+                <StockCard content="Bitcoin" share_object={shareList[0]} />
+                <StockCard content="Nike" />
+                <StockCard content="Adidas" />
             </ScrollView>
             <TouchableOpacity style={styles.floatingSearchButton}>
                 <FontAwesome name="search" size={24} color="white" />
