@@ -45,18 +45,21 @@ export default function App() {
         },
         {
             id: "AAPL",
-            name: "Apple",
+            name: "Apple Inc",
+            type: "stock",
+            value: 0,
+            status: "loading",
+            history: [],
+        },
+        {
+            id: "MSFT",
+            name: "Microsoft Corp",
             type: "stock",
             value: 0,
             status: "loading",
             history: [],
         },
     ]);
-    getCurrentStockPrice({ symbol: "AAPL" });
-    getCurrentCryptoPrice({ coin_id: "bitcoin" });
-    getStockMarketStatus();
-    getStockMarketHolidays();
-    getStockCompanyProfile({ symbol: "AAPL" });
     useEffect(() => {
         async function getData() {
             if (shareList) {
@@ -65,13 +68,10 @@ export default function App() {
                     let id = shareList[i].id;
                     if (shareList[i].type == "crypto") {
                         let data = await getCryptoHistory({ coin_id: id });
-                        var copy = copy.map((stock) => {
+                        copy = copy.map((stock) => {
                             if (stock.id === id) {
                                 return {
                                     ...stock,
-                                    id: stock.id,
-                                    name: stock.name,
-                                    type: stock.type,
                                     value:
                                         Math.round(data.slice(-1)[0][1] * 100) /
                                         100,
@@ -83,13 +83,27 @@ export default function App() {
                             }
                         });
                     } else if (shareList[i].type == "stock") {
+                        let data = await getCurrentStockPrice({
+                            symbol: shareList[i].id,
+                        });
+                        copy = copy.map((stock) => {
+                            if (stock.id === id) {
+                                return {
+                                    ...stock,
+                                    value: Math.round(data.c * 100) / 100,
+                                    status: "fetched",
+                                };
+                            } else {
+                                return stock;
+                            }
+                        });
                     }
                 }
             }
             //shareList muss außerhalb vom Loop geupdated werden, da der State nicht sofort geupdated wird und somit auf den alten State zugegriffen wird.
             setShareList(copy);
         }
-        //getData();
+        getData();
     }, []);
 
     return (
