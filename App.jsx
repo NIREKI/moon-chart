@@ -72,9 +72,10 @@ export default function App() {
                             if (stock.id === id) {
                                 return {
                                     ...stock,
-                                    value:
+                                    value: (
                                         Math.round(data.slice(-1)[0][1] * 100) /
-                                        100,
+                                        100
+                                    ).toFixed(2),
                                     history: data,
                                     status: "fetched",
                                 };
@@ -90,7 +91,9 @@ export default function App() {
                             if (stock.id === id) {
                                 return {
                                     ...stock,
-                                    value: Math.round(data.c * 100) / 100,
+                                    value: (
+                                        Math.round(data.c * 100) / 100
+                                    ).toFixed(2),
                                     status: "fetched",
                                 };
                             } else {
