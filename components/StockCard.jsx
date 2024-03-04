@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
-import { YAxis, LineChart, Grid } from "react-native-svg-charts";
+import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
 import getCurrentPrice, { getHistory } from "../scripts/Crypto.js";
 
 var width = Dimensions.get("window").width;
@@ -22,7 +22,6 @@ export default function StockCard({ content, share_object }) {
         setExpanded(!expanded);
     };
     useEffect(() => {
-        //console.log(share_object.id + " Wert: " + share_object.value);
         if (share_object.status === "loading") {
             setStatus("loading");
         } else if (share_object.status === "fetched") {
@@ -58,25 +57,36 @@ export default function StockCard({ content, share_object }) {
                 </View>
                 {expanded && (
                     <>
-                        <View style={{ flexDirection: "row", height: 200 }}>
-                            <YAxis
-                                data={data}
-                                contentInset={{ top: 20, bottom: 20 }}
-                                svg={{
-                                    fill: Colors.FROST_WHITE,
-                                    fontSize: 12,
+                        <View style={{ flexDirection: "column" }}>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    height: 200,
                                 }}
-                                numberOfTicks={10}
-                                formatLabel={(value) => `${value}€`}
-                            />
-                            <LineChart
-                                style={{ flex: 1, marginLeft: 16 }}
-                                data={data}
-                                svg={{ stroke: Colors.FROST_WHITE }}
-                                contentInset={{ top: 20, bottom: 20 }}
                             >
-                                <Grid />
-                            </LineChart>
+                                <YAxis
+                                    data={share_object.history.map(
+                                        (item) => item[1]
+                                    )}
+                                    contentInset={{ top: 20, bottom: 20 }}
+                                    svg={{
+                                        fill: Colors.FROST_WHITE,
+                                        fontSize: 12,
+                                    }}
+                                    numberOfTicks={10}
+                                    formatLabel={(value) => `${value}€`}
+                                />
+                                <LineChart
+                                    style={{ flex: 1, marginLeft: 16 }}
+                                    data={share_object.history.map(
+                                        (item) => item[1]
+                                    )}
+                                    svg={{ stroke: Colors.FROST_WHITE }}
+                                    contentInset={{ top: 20, bottom: 20 }}
+                                >
+                                    <Grid />
+                                </LineChart>
+                            </View>
                         </View>
                     </>
                 )}

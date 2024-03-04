@@ -23,9 +23,7 @@ export async function getHistory({coin_id}){
         }
     });
     const jsonData = await res.json();
-    console.log(jsonData.prices)
-    //prices.slice(-1) returned das letzte also das aktuellste Element.
-    console.log(jsonData.prices.slice(-1));
+    //only return price because the app won't display the rest of the data
     return jsonData.prices;
 
     

@@ -26,6 +26,7 @@ export default function App() {
             type: "crypto",
             value: 0,
             status: "loading",
+            history: [],
         },
         {
             id: "ethereum",
@@ -33,6 +34,7 @@ export default function App() {
             type: "crypto",
             value: 0,
             status: "loading",
+            history: [],
         },
     ]);
 
@@ -42,7 +44,7 @@ export default function App() {
                 var copy = shareList;
                 for (let i = 0; i < shareList.length; i++) {
                     let id = shareList[i].id;
-                    let data = await getCurrentPrice({ coin_id: id });
+                    let data = await getHistory({ coin_id: id });
                     var copy = copy.map((stock) => {
                         if (stock.id === id) {
                             return {
@@ -50,18 +52,14 @@ export default function App() {
                                 id: stock.id,
                                 name: stock.name,
                                 type: stock.type,
-                                value: data[id].eur,
+                                value:
+                                    Math.round(data.slice(-1)[0][1] * 100) /
+                                    100,
+                                history: data,
                                 status: "fetched",
                             };
                         } else {
-                            return {
-                                ...stock,
-                                id: stock.id,
-                                name: stock.name,
-                                type: stock.type,
-                                value: stock.value,
-                                status: stock.status,
-                            };
+                            return stock;
                         }
                     });
                 }
