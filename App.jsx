@@ -53,7 +53,6 @@ export default function App() {
                                 status: "fetched",
                             };
                         } else {
-                            console.log(stock.id);
                             return {
                                 ...stock,
                                 id: stock.id,

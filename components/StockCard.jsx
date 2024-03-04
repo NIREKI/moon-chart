@@ -19,7 +19,7 @@ export default function StockCard({ content, share_object }) {
         setExpanded(!expanded);
     };
     useEffect(() => {
-        console.log(share_object.id + " Wert: " + share_object.value);
+        //console.log(share_object.id + " Wert: " + share_object.value);
         if (share_object.status === "loading") {
             setStatus("loading");
         } else if (share_object.status === "fetched") {
