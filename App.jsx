@@ -6,6 +6,7 @@ import {
     Text,
     TouchableOpacity,
     View,
+    FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -74,14 +75,16 @@ export default function App() {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>MoonChart</Text>
-            <ScrollView
+            <FlatList
                 style={{ flex: 1, width: width }}
                 contentContainerStyle={{ alignItems: "center" }}
-            >
-                <StockCard share_object={shareList[0]} />
-                <StockCard share_object={shareList[1]} />
-                <StockCard share_object={shareList[0]} />
-            </ScrollView>
+                numColumns={1}
+                data={shareList}
+                renderItem={(shareObject) => (
+                    <StockCard share_object={shareObject.item} />
+                )}
+                keyExtractor={(shareObject) => shareObject.id}
+            />
             <TouchableOpacity style={styles.floatingSearchButton}>
                 <FontAwesome name="search" size={24} color="white" />
             </TouchableOpacity>
@@ -94,6 +97,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "white",
         alignItems: "center",
+        width: "100%",
         //justifyContent: "flex-start",
     },
     header: {

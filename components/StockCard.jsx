@@ -5,11 +5,14 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Dimensions,
 } from "react-native";
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid } from "react-native-svg-charts";
 import getCurrentPrice, { getHistory } from "../scripts/Crypto.js";
+
+var width = Dimensions.get("window").width;
 
 export default function StockCard({ content, share_object }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
         backgroundColor: "black",
         padding: 10,
         marginBottom: 10,
-        width: "80%",
+        width: (width / 100) * 80,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
