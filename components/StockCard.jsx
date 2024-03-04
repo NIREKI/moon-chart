@@ -30,7 +30,7 @@ export default function StockCard({ content, share_object }) {
     }, [share_object]);
     return (
         <>
-            <Pressable onPress={toggleExpanded} style={styles.outline}>
+            <View style={styles.outline}>
                 <View style={styles.view}>
                     {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
                     <Text style={styles.header}>{share_object.name}</Text>
@@ -47,12 +47,14 @@ export default function StockCard({ content, share_object }) {
                                 {share_object.value + "€"}
                             </Text>
                         )}
-                        <AntDesign
-                            name="plussquareo"
-                            size={24}
-                            color="orange"
-                            style={{ alignSelf: "center" }}
-                        />
+                        <TouchableOpacity onPress={toggleExpanded}>
+                            <AntDesign
+                                name="plussquareo"
+                                size={24}
+                                color="orange"
+                                style={{ alignSelf: "center" }}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
                 {expanded && (
@@ -90,7 +92,7 @@ export default function StockCard({ content, share_object }) {
                         </View>
                     </>
                 )}
-            </Pressable>
+            </View>
         </>
     );
 }
