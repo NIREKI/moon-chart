@@ -10,7 +10,7 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
-import getCurrentPrice, { getHistory } from "../scripts/crypto.js";
+import getCurrentCryptoPrice, { getCryptoHistory } from "../scripts/crypto.js";
 
 var width = Dimensions.get("window").width;
 
@@ -57,6 +57,9 @@ export default function StockCard({ content, share_object }) {
                         </TouchableOpacity>
                     </View>
                 </View>
+                {
+                    //TODO: Hier muss unterschieden werden zwischen Stock und Crypto.
+                }
                 {expanded && (
                     <>
                         <View style={{ flexDirection: "column" }}>
