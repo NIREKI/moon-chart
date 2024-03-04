@@ -13,7 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 import { FontAwesome } from "@expo/vector-icons";
-import getCurrentPrice, { getHistory } from "./scripts/Crypto.js";
+import getCurrentPrice, { getHistory } from "./scripts/crypto.js";
 import { useState, useEffect } from "react";
 
 export default function App() {

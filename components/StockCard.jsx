@@ -10,7 +10,7 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
-import getCurrentPrice, { getHistory } from "../scripts/Crypto.js";
+import getCurrentPrice, { getHistory } from "../scripts/crypto.js";
 
 var width = Dimensions.get("window").width;
 
