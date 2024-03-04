@@ -14,40 +14,35 @@ import getCurrentPrice, { getHistory } from "../scripts/Crypto.js";
 export default function StockCard({ content, share_object }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
-    const [shareObject, setShareObject] = useState(share_object);
-    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState("");
     const toggleExpanded = () => {
         setExpanded(!expanded);
     };
     useEffect(() => {
-        async function getData() {
-            if (share_object) {
-                let id = share_object.id;
-                let data = await getCurrentPrice({ coin_id: id });
-                let tempObj = shareObject;
-                tempObj.value = data[id].eur;
-                setShareObject(tempObj);
-                console.log(shareObject.value);
-                setLoading(true);
-                //getHistory({ coin_id: id });
-            }
+        console.log(share_object.id + " Wert: " + share_object.value);
+        if (share_object.status === "loading") {
+            setStatus("loading");
+        } else if (share_object.status === "fetched") {
+            setStatus("fetched");
         }
-        getData();
-    }, []);
+    }, [share_object]);
     return (
         <>
             <Pressable onPress={toggleExpanded} style={styles.outline}>
                 <View style={styles.view}>
                     {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
-                    <Text style={styles.header}>{content}</Text>
+                    <Text style={styles.header}>{share_object.name}</Text>
                     <View style={styles.itemsRight}>
-                        {!shareObject && (
+                        {!share_object && (
                             <Text style={styles.value}>Not available.</Text>
                         )}
+                        {share_object && status === "loading" && (
+                            <Text style={styles.value}>Loading!</Text>
+                        )}
                         {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
-                        {shareObject && loading && (
+                        {share_object && status === "fetched" && (
                             <Text style={styles.value}>
-                                {shareObject.value + "€"}
+                                {share_object.value + "€"}
                             </Text>
                         )}
                         <AntDesign
