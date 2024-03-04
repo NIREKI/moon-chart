@@ -18,7 +18,7 @@ export default async function getCurrentCryptoPrice({coin_id}){
     return jsonData[coin_id].eur;
 }
 /**
- * 
+ * TODO: Days Parameter einfügen
  * @param {string} coin_id die ID des Coins bei CoinGecko, zB bitcoin für Bitcoin 
  * @returns ein zweidimensionales Array, was aus [timestamp, preis] besteht.
  */

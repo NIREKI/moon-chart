@@ -9,6 +9,7 @@
      * o: Open Wert
      * pc: previous close
      * t: timestamp der Daten.
+     * @copyright finnhub
      * @param {string} symbol Das Symbol der Aktie, zB AAPL für Apple
      * @var key Muss in der .env als EXPO_PUBLIC_FINNHUB_API_TOKEN angegeben werden
      */
@@ -44,6 +45,7 @@ export async function getCurrentStockPrice( {symbol} ){
  * isOpen = true/false ob die börse geöffnet hat
  * session: die aktuelle session in der die Börse sich befindet.. "pre-market"/"regular"
  * t = Timestamp
+ * @copyright finnhub
  */
 export async function getStockMarketStatus() {
     let key = process.env.EXPO_PUBLIC_FINNHUB_API_TOKEN;
@@ -62,7 +64,8 @@ export async function getStockMarketStatus() {
 }
 /**
  * Fraglich, ob diese Funktion genutzt wird.
- * @returns JSON Object mit allen aktuellen Tagen an denen die Börse außerordentlich geschlossen hat:
+ * @returns JSON Object mit allen aktuellen Tagen an denen die Börse außerordentlich geschlossen hat
+ * @copyright finnhub
  */
 export async function getStockMarketHolidays() {
     /**
@@ -96,6 +99,7 @@ export async function getStockMarketHolidays() {
  * phone -> Telefonnummer
  * ticker -> zB AAPL
  * weburl -> Website des Unternehmens
+ * @copyright finnhub
  * @param {*} param0 
  */
 export async function getStockCompanyProfile( {symbol} ){
