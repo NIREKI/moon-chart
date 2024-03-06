@@ -17,6 +17,7 @@ import getCurrentCryptoPrice, { getCryptoHistory } from "./scripts/crypto.js";
 import {
     getCurrentStockPrice,
     getStockCompanyProfile,
+    getStockHistory,
     getStockMarketHolidays,
     getStockMarketStatus,
 } from "./scripts/stock.js";
