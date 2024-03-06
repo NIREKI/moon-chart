@@ -130,12 +130,13 @@ export async function getStockCompanyProfile( {symbol} ){
  * @return {Object} the JSON data containing the stock history
  * @copyright polygon.io
  */
-export async function getStockHistory( {symbol} ){
+export async function getStockHistory( {symbol, exchangeRate} ){
+    console.log(exchangeRate);
     let today = getTodaysDate();
     let yesterday = getYesterdaysDate();
-    console.log("Today: " + today + " Yesterday: " + yesterday);
     let key = process.env.EXPO_PUBLIC_POLYGON_API_TOKEN;
-    const res = await fetch("https://api.polygon.io/v2/aggs/ticker/" + symbol + "/range/1/hour/" + yesterday + "/" + today +"?adjusted=true&sort=asc&limit=5000&apiKey=" + key, {
+    // gibt den letzten Tag in 10 minütigen Abständen zurück.
+    const res = await fetch("https://api.polygon.io/v2/aggs/ticker/" + symbol + "/range/10/minute/" + yesterday + "/" + today +"?adjusted=true&sort=asc&limit=5000&apiKey=" + key, {
         method: "GET",
         mode: "cors",
         cache: "no-cache",
@@ -149,7 +150,7 @@ export async function getStockHistory( {symbol} ){
     } else if (res.status === 200){
         const jsonData = await res.json();
         // TODO: Get exchange rates from usd to eur and apply them to the price data
-        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: item.vw}));
+        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: (exchangeRate >= 1) ? item.vw * exchangeRate : item.vw / exchangeRate}));
         return filteredResults;
     }
     

@@ -10,21 +10,26 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
-import getCurrentCryptoPrice, { getCryptoHistory } from "../scripts/crypto.js";
+import { PacmanIndicator } from "react-native-indicators";
 
 var width = Dimensions.get("window").width;
 
-export default function StockCard({ content, share_object }) {
+export default function StockCard({ share_object, getHistory }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
     const [status, setStatus] = useState("");
     const toggleExpanded = () => {
+        // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
+        if (share_object.historyStatus === "loading") {
+            getHistory({ id: share_object.id, type: share_object.type });
+        }
         setExpanded(!expanded);
     };
     useEffect(() => {
-        if (share_object.status === "loading") {
+        // TODO: Rewrite this. Function isn't neccesary anymore.
+        if (share_object.valueStatus === "loading") {
             setStatus("loading");
-        } else if (share_object.status === "fetched") {
+        } else if (share_object.valueStatus === "fetched") {
             setStatus("fetched");
         }
     }, [share_object]);
@@ -57,7 +62,21 @@ export default function StockCard({ content, share_object }) {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {expanded && (
+                {expanded && share_object.historyStatus === "loading" && (
+                    <View
+                        style={{
+                            flex: 1,
+                            alignContent: "center",
+                            height: 200,
+                        }}
+                    >
+                        <PacmanIndicator
+                            color={Colors.FROST_WHITE}
+                            size={100}
+                        />
+                    </View>
+                )}
+                {expanded && share_object.historyStatus === "fetched" && (
                     <>
                         <View style={{ flexDirection: "column" }}>
                             <View
@@ -79,7 +98,11 @@ export default function StockCard({ content, share_object }) {
                                     formatLabel={(value) => `${value}€`}
                                 />
                                 <LineChart
-                                    style={{ flex: 1, marginLeft: 16 }}
+                                    style={{
+                                        flex: 1,
+                                        marginLeft: 16,
+                                        height: 200,
+                                    }}
                                     data={share_object.history.map(
                                         (item) => item.price
                                     )}
