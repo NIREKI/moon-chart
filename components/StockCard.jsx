@@ -71,7 +71,7 @@ export default function StockCard({ content, share_object }) {
                             >
                                 <YAxis
                                     data={share_object.history.map(
-                                        (item) => item[1]
+                                        (item) => item.price
                                     )}
                                     contentInset={{ top: 20, bottom: 20 }}
                                     svg={{
@@ -84,7 +84,7 @@ export default function StockCard({ content, share_object }) {
                                 <LineChart
                                     style={{ flex: 1, marginLeft: 16 }}
                                     data={share_object.history.map(
-                                        (item) => item[1]
+                                        (item) => item.price
                                     )}
                                     svg={{ stroke: Colors.FROST_WHITE }}
                                     contentInset={{ top: 20, bottom: 20 }}

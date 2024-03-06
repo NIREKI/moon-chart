@@ -33,8 +33,15 @@ export async function getCryptoHistory({coin_id}){
         }
     });
     const jsonData = await res.json();
+    // vorab wird die Data in das Format [[timestamp, price],...] gebracht.
+    const jsonResponse = jsonData.prices.map(item => {
+        return{
+            timestamp: item[0],
+            price: item[1]
+        }
+    });
     //es wird nur das prices object mitgegeben, da die anderen Daten an keiner Stelle angezeigt werden sollen.
-    return jsonData.prices;
+    return jsonResponse;
 
     
 }

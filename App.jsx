@@ -74,8 +74,9 @@ export default function App() {
                                 return {
                                     ...stock,
                                     value: (
-                                        Math.round(data.slice(-1)[0][1] * 100) /
-                                        100
+                                        Math.round(
+                                            data.slice(-1)[0].price * 100
+                                        ) / 100
                                     ).toFixed(2),
                                     history: data,
                                     status: "fetched",
@@ -108,6 +109,7 @@ export default function App() {
             setShareList(copy);
         }
         getData();
+        //getStockHistory({ symbol: "AAPL" });
     }, []);
 
     return (
