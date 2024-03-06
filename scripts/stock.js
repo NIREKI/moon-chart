@@ -148,7 +148,6 @@ export async function getStockHistory( {symbol, exchangeRate} ){
         return null;
     } else if (res.status === 200){
         const jsonData = await res.json();
-        // TODO: Get exchange rates from usd to eur and apply them to the price data
         const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: (exchangeRate >= 1) ? item.vw * exchangeRate : item.vw / exchangeRate}));
         return filteredResults;
     }
