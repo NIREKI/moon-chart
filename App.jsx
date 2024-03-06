@@ -81,13 +81,11 @@ export default function App() {
                     },
                 }
             );
-            console.log(res.status);
             if (res.status === 200) {
                 const jsonData = await res.json();
                 exchangeRate.rate = jsonData.data.EUR;
                 // set exchangeRate.timestamp to the current time
                 exchangeRate.timestamp = Date.now();
-                console.log(exchangeRate.rate + " " + exchangeRate.timestamp);
             } else {
                 // Failsafe: set exchangeRate.rate to 0.92
                 exchangeRate.rate = 0.92;

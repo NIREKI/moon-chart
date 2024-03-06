@@ -131,7 +131,6 @@ export async function getStockCompanyProfile( {symbol} ){
  * @copyright polygon.io
  */
 export async function getStockHistory( {symbol, exchangeRate} ){
-    console.log(exchangeRate);
     let today = getTodaysDate();
     let yesterday = getYesterdaysDate();
     let key = process.env.EXPO_PUBLIC_POLYGON_API_TOKEN;
