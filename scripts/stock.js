@@ -131,10 +131,6 @@ export async function getStockCompanyProfile( {symbol} ){
  * @copyright polygon.io
  */
 export async function getStockHistory( {symbol} ){
-    /**
-     * Sample Response:
-     * https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/hour/2024-02-20/2024-02-22?adjusted=true&sort=asc&limit=5000&apiKey=f8G_fvLUNvaa4SOptEEj1iwj1lv4b4Gj
-     */
     let today = getTodaysDate();
     let yesterday = getYesterdaysDate();
     console.log("Today: " + today + " Yesterday: " + yesterday);
