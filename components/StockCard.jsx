@@ -10,7 +10,7 @@ import {
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
-import { PacmanIndicator } from "react-native-indicators";
+import { PacmanIndicator, PulseIndicator } from "react-native-indicators";
 
 var width = Dimensions.get("window").width;
 
@@ -44,7 +44,11 @@ export default function StockCard({ share_object, getHistory }) {
                             <Text style={styles.value}>Not available.</Text>
                         )}
                         {share_object && status === "loading" && (
-                            <Text style={styles.value}>Loading!</Text>
+                            <PulseIndicator
+                                color={Colors.FROST_WHITE}
+                                size={30}
+                                style={styles.value}
+                            />
                         )}
                         {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
                         {share_object && status === "fetched" && (

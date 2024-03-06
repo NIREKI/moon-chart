@@ -67,6 +67,7 @@ export default function App() {
         },
     ]);
     async function getExchangeRate() {
+        // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
         if (exchangeRate.timestamp === 0) {
             let key = process.env.EXPO_PUBLIC_FREECURRENCY_API_TOKEN;
             const res = await fetch(
@@ -237,7 +238,7 @@ const styles = StyleSheet.create({
         padding: 40,
         fontSize: 30,
         fontWeight: "bold",
-        color: Colors.FROST_WHITE,
+        color: Colors.PURPLE,
     },
     floatingSearchButton: {
         position: "absolute",
