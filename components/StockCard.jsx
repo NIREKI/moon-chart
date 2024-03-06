@@ -57,9 +57,6 @@ export default function StockCard({ content, share_object }) {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {
-                    //TODO: Hier muss unterschieden werden zwischen Stock und Crypto.
-                }
                 {expanded && (
                     <>
                         <View style={{ flexDirection: "column" }}>

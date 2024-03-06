@@ -89,6 +89,9 @@ export default function App() {
                         let data = await getCurrentStockPrice({
                             symbol: shareList[i].id,
                         });
+                        let historyData = await getStockHistory({
+                            symbol: shareList[i].id,
+                        });
                         copy = copy.map((stock) => {
                             if (stock.id === id) {
                                 return {
@@ -96,6 +99,7 @@ export default function App() {
                                     value: (
                                         Math.round(data.c * 100) / 100
                                     ).toFixed(2),
+                                    history: historyData,
                                     status: "fetched",
                                 };
                             } else {

@@ -152,10 +152,8 @@ export async function getStockHistory( {symbol} ){
         return null;
     } else if (res.status === 200){
         const jsonData = await res.json();
-        console.log(jsonData.results);
         const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: item.vw}));
-        console.log(filteredResults);
-        return jsonData.results;
+        return filteredResults;
     }
     
 }
