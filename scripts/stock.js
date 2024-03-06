@@ -29,10 +29,10 @@ export async function getCurrentStockPrice( {symbol} ){
         console.log("Error")
     }
     if(res.status === 429){
+        //TODO: handle rate limit
         console.log("Finnhub Rate Limit Exceeded");
     }
     const jsonData = await res.json();
-    console.log(jsonData);
 
     return jsonData;
     
@@ -114,6 +114,70 @@ export async function getStockCompanyProfile( {symbol} ){
     });
 
     const jsonData = await res.json();
-    console.log(jsonData);
     return jsonData;
+}
+
+/**
+ * Retrieves stock history data for the given symbol.
+ *
+ * Response Format: "results":[{"v":47237,"vw":181.4583,"o":181.7,"c":181.48,"h":181.9,"l":181.15,"t":1708419600000,"n":1787},...]
+ * Macht es notwendig, dass die Daten für eine Verwendung wie bei crypto.js transformiert werden müssen, Format: [timestamp, preis]
+ * 
+ * Wichtig ist hier der timestamp "t" und der Wert "vw" als Preis, da dies der Struktur von CoinGecko am nahesten kommt.
+ * 
+ * Problem: Die API kann nur Daten zurückgeben, die ein Tag alt sind, also den heutigen Tag nicht beinhalten.
+ * @param {Object} symbol - the stock symbol to retrieve data for
+ * @return {Object} the JSON data containing the stock history
+ * @copyright polygon.io
+ */
+export async function getStockHistory( {symbol, exchangeRate} ){
+    console.log(exchangeRate);
+    let today = getTodaysDate();
+    let yesterday = getYesterdaysDate();
+    let key = process.env.EXPO_PUBLIC_POLYGON_API_TOKEN;
+    // gibt den letzten Tag in 10 minütigen Abständen zurück.
+    const res = await fetch("https://api.polygon.io/v2/aggs/ticker/" + symbol + "/range/10/minute/" + yesterday + "/" + today +"?adjusted=true&sort=asc&limit=5000&apiKey=" + key, {
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+    if(res.status === 429){
+        // TODO: Handle too many requests error. Only 5 requests per minute allowed.
+        return null;
+    } else if (res.status === 200){
+        const jsonData = await res.json();
+        // TODO: Get exchange rates from usd to eur and apply them to the price data
+        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: (exchangeRate >= 1) ? item.vw * exchangeRate : item.vw / exchangeRate}));
+        return filteredResults;
+    }
+    
+}
+
+/**
+     * Function to get today's date in the format 'yyyy-mm-dd'.
+     *
+     * @return {string} The formatted date string
+     */
+function getTodaysDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+/**
+ * Get yesterday's date in the format 'YYYY-MM-DD'.
+ *
+ * @return {string} The formatted yesterday's date
+ */
+function getYesterdaysDate() {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const year = yesterday.getFullYear();
+    const month = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const day = String(yesterday.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
