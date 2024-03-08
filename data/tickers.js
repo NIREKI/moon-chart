@@ -1,4 +1,6 @@
 export function getTickers(){
+  // TODO: Fetch new list at least once a day from the github repo https://github.com/rreichel3/US-Stock-Symbols/blob/main/nasdaq/nasdaq_full_tickers.json
+  // For this the list has to be saved locally with a timestamp. Same stuff as with the USD EUR Exchange rate.
   return(
   [
     {

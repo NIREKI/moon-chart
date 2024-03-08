@@ -1,4 +1,6 @@
 export function getCoins(){
+    // TODO: Fetch new list at least once a day from the /coins/list endpoint of coingecko
+    // For this the list has to be saved locally with a timestamp. Same stuff as with the USD EUR Exchange rate.
     return(
         [
         {
