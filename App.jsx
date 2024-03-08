@@ -12,7 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import getCurrentCryptoPrice, { getCryptoHistory } from "./scripts/crypto.js";
 import {
     getCurrentStockPrice,
@@ -237,24 +237,37 @@ export function HomeScreen({ navigation }) {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>MoonChart</Text>
-            <FlatList
-                style={{ flex: 1, width: width }}
-                contentContainerStyle={{ alignItems: "center" }}
-                numColumns={1}
-                data={shareList}
-                renderItem={(shareObject) => (
-                    <StockCard
-                        share_object={shareObject.item}
-                        getHistory={getHistory}
-                    />
-                )}
-                keyExtractor={(shareObject) => shareObject.id}
-            />
+            <View style={{ height: height * 0.8, width: width }}>
+                <FlatList
+                    style={{ flex: 1, width: width }}
+                    contentContainerStyle={{ alignItems: "center" }}
+                    numColumns={1}
+                    data={shareList}
+                    renderItem={(shareObject) => (
+                        <StockCard
+                            share_object={shareObject.item}
+                            getHistory={getHistory}
+                        />
+                    )}
+                    keyExtractor={(shareObject) => shareObject.id}
+                />
+            </View>
+            {/* Floating Search button */}
             <TouchableOpacity
                 style={styles.floatingSearchButton}
                 onPress={() => navigation.navigate("Search")}
             >
-                <FontAwesome name="search" size={24} color="white" />
+                <Text
+                    style={{
+                        color: "#fff",
+                        fontWeight: "bold",
+                        paddingRight: 20,
+                        fontSize: 20,
+                    }}
+                >
+                    Suchen
+                </Text>
+                <FontAwesome5 name="search" size={20} color="#fff" />
             </TouchableOpacity>
         </View>
     );
@@ -294,12 +307,13 @@ const styles = StyleSheet.create({
         color: Colors.PURPLE,
     },
     floatingSearchButton: {
+        flexDirection: "row",
         position: "absolute",
         bottom: 10,
         right: 15,
         backgroundColor: "black",
         padding: 20,
-        borderRadius: 100,
+        borderRadius: 20,
         textAlign: "center",
     },
 });

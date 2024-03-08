@@ -12,6 +12,8 @@ import { getTickers } from "../data/tickers.js";
 import { useState } from "react";
 import Banner from "./Banner";
 import { getCoins } from "../data/cryptoList.js";
+import SearchResultItem from "./SearchResultItem.jsx";
+import Colors from "../Colors.jsx";
 var width = Dimensions.get("window").width;
 var height = Dimensions.get("window").height;
 
@@ -31,17 +33,27 @@ export default function Search({ navigation }) {
                     >
                         <Banner
                             header="ℹ️ Eingabe zu kurz"
-                            content="Bitte mindestens 3 Zeichen eingeben."
+                            content={`### Nach der gewünschten **Aktie** oder **Kryptowährung** suchen🔍 \n\nBitte *mindestens* drei Zeichen eingeben.`}
                             color="#ffc30280"
                         />
                     </View>
                 )}
-                {showList && (
-                    <View>
+                {showList && results.length > 0 && (
+                    <View style={styles.containerSectionList}>
                         <SectionList
                             sections={results}
                             keyExtractor={(item, index) => item + index}
-                            renderItem={({ item }) => <Text>{item.name}</Text>}
+                            renderItem={({ item, index, section }) => (
+                                <SearchResultItem
+                                    item={item}
+                                    style={[
+                                        styles.sectionItem,
+                                        index === 0 && styles.sectionItemFirst,
+                                        index === section.data.length - 1 &&
+                                            styles.sectionItemLast,
+                                    ]}
+                                />
+                            )}
                             renderSectionHeader={({ section: { type } }) => (
                                 <Text style={styles.typeHeader}>{type}</Text>
                             )}
@@ -58,7 +70,7 @@ export default function Search({ navigation }) {
                     >
                         <Banner
                             header="⚠️ Keine Ergebnisse"
-                            content="Ergebnisse sind auf die Amerikanische NASDAQ Börse begrenzt. Bitte beschränke dich auf ausschließlich amerikanische Aktien."
+                            content={`### Die Ergebnisse sind auf die amerikanische **NASDAQ** Börse und die Kryptobörse **CoinGecko** begrenzt. \nBitte beschränke dich ausschließlich darauf.`}
                             color="#ffc30280"
                         />
                     </View>
@@ -150,6 +162,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         alignSelf: "center",
         color: "#000",
+        backgroundColor: "#fff",
         fontSize: 23,
         bottom: (height / 100) * 3,
         width: (width / 100) * 85,
@@ -160,10 +173,29 @@ const styles = StyleSheet.create({
         height: height,
         flex: 1,
     },
+    containerSectionList: {
+        height: height * 0.8,
+    },
     typeHeader: {
         fontWeight: "bold",
-        fontSize: 20,
-        color: "#000",
-        marginVertical: 10,
+        fontSize: 23,
+        color: Colors.BRIGHT_BLUE,
+        marginVertical: 15,
+        paddingLeft: 10,
+    },
+    sectionItem: {
+        marginHorizontal: 10,
+        backgroundColor: Colors.LIGHT_GREY,
+        borderBottomWidth: 1,
+        padding: 10,
+    },
+    sectionItemFirst: {
+        borderTopLeftRadius: 7,
+        borderTopRightRadius: 7,
+    },
+    sectionItemLast: {
+        borderBottomLeftRadius: 7,
+        borderBottomRightRadius: 7,
+        borderBottomWidth: 0,
     },
 });

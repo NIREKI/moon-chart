@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text } from "react-native";
+import Markdown from "react-native-markdown-display";
 
 export default function Banner({ color, header, content }) {
     const styles = StyleSheet.create({
@@ -19,9 +20,6 @@ export default function Banner({ color, header, content }) {
             paddingTop: 20,
         },
         content: {
-            fontSize: 18,
-            textAlign: "justify",
-            fontWeight: "normal",
             paddingTop: 10,
             paddingBottom: 10,
             paddingHorizontal: 20,
@@ -31,7 +29,10 @@ export default function Banner({ color, header, content }) {
     return (
         <View style={styles.banner}>
             <Text style={styles.header}>{header}</Text>
-            <Text style={styles.content}>{content}</Text>
+            <View style={styles.content}>
+                <Markdown>{content}</Markdown>
+            </View>
+            {/* <Text style={styles.content}>{content}</Text> */}
         </View>
     );
 }
