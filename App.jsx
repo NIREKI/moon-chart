@@ -24,9 +24,10 @@ import {
 import { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Search from "./components/Search.jsx";
 
 const Stack = createNativeStackNavigator();
-export function HomeScreen() {
+export function HomeScreen({ navigation }) {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
     // Die id ist bei Aktien das Ticker symbol.
@@ -62,6 +63,15 @@ export function HomeScreen() {
         {
             id: "MSFT",
             name: "Microsoft Corp",
+            type: "stock",
+            value: 0,
+            valueStatus: "loading",
+            historyStatus: "loading",
+            history: [],
+        },
+        {
+            id: "ZAPP",
+            name: "Admiral Group",
             type: "stock",
             value: 0,
             valueStatus: "loading",
@@ -222,7 +232,10 @@ export function HomeScreen() {
                 )}
                 keyExtractor={(shareObject) => shareObject.id}
             />
-            <TouchableOpacity style={styles.floatingSearchButton}>
+            <TouchableOpacity
+                style={styles.floatingSearchButton}
+                onPress={() => navigation.navigate("Search")}
+            >
                 <FontAwesome name="search" size={24} color="white" />
             </TouchableOpacity>
         </View>
@@ -237,6 +250,11 @@ export default function App() {
                     name="Home"
                     component={HomeScreen}
                     options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Search"
+                    component={Search}
+                    options={{ title: "Suche" }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
