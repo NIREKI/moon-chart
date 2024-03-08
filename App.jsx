@@ -22,8 +22,11 @@ import {
     getStockMarketStatus,
 } from "./scripts/stock.js";
 import { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-export default function App() {
+const Stack = createNativeStackNavigator();
+export function HomeScreen() {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
     // Die id ist bei Aktien das Ticker symbol.
@@ -223,6 +226,20 @@ export default function App() {
                 <FontAwesome name="search" size={24} color="white" />
             </TouchableOpacity>
         </View>
+    );
+}
+
+export default function App() {
+    return (
+        <NavigationContainer>
+            <Stack.Navigator>
+                <Stack.Screen
+                    name="Home"
+                    component={HomeScreen}
+                    options={{ headerShown: false }}
+                />
+            </Stack.Navigator>
+        </NavigationContainer>
     );
 }
 
