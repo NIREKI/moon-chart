@@ -30,7 +30,8 @@ const Stack = createNativeStackNavigator();
 export function HomeScreen({ navigation }) {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
-    // Die id ist bei Aktien das Ticker symbol.
+    // debug mode: No API Fetches
+    const debug = true;
     const exchangeRate = { rate: 0, timestamp: 0 };
     const [shareList, setShareList] = useState([
         {
@@ -213,7 +214,24 @@ export function HomeScreen({ navigation }) {
             //shareList muss außerhalb vom Loop geupdated werden, da der State nicht sofort geupdated wird und somit auf den alten State zugegriffen wird.
             setShareList(copy);
         }
-        getValueData();
+        if (debug) {
+            setShareList(
+                shareList.map((item) => {
+                    return {
+                        ...item,
+                        value: 10,
+                        valueStatus: "fetched",
+                        history: [
+                            { price: 10, timestamp: 0 },
+                            { price: 11, timestamp: 10 },
+                        ],
+                        historyStatus: "fetched",
+                    };
+                })
+            );
+        } else {
+            getValueData();
+        }
     }, []);
 
     return (
