@@ -5,84 +5,121 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Dimensions,
 } from "react-native";
 import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
-import { YAxis, LineChart, Grid } from "react-native-svg-charts";
-import getCurrentPrice, { getHistory } from "../scripts/crypto.js";
+import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
+import { PacmanIndicator, PulseIndicator } from "react-native-indicators";
 
-export default function StockCard({ content, share_object }) {
+var width = Dimensions.get("window").width;
+
+export default function StockCard({ share_object, getHistory }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
-    const [shareObject, setShareObject] = useState(share_object);
-    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState("");
     const toggleExpanded = () => {
+        // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
+        if (share_object.historyStatus === "loading") {
+            getHistory({ id: share_object.id, type: share_object.type });
+        }
         setExpanded(!expanded);
     };
     useEffect(() => {
-        async function getData() {
-            if (share_object) {
-                let id = share_object.id;
-                let data = await getCurrentPrice({ coin_id: id });
-                let tempObj = shareObject;
-                tempObj.value = data[id].eur;
-                setShareObject(tempObj);
-                console.log(shareObject.value);
-                setLoading(true);
-                //getHistory({ coin_id: id });
-            }
+        // TODO: Rewrite this. Function isn't neccesary anymore.
+        if (share_object.valueStatus === "loading") {
+            setStatus("loading");
+        } else if (share_object.valueStatus === "fetched") {
+            setStatus("fetched");
         }
-        getData();
-    }, []);
+    }, [share_object]);
     return (
         <>
-            <Pressable onPress={toggleExpanded} style={styles.outline}>
+            <View style={styles.outline}>
                 <View style={styles.view}>
                     {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
-                    <Text style={styles.header}>{content}</Text>
+                    <Text style={styles.header}>{share_object.name}</Text>
                     <View style={styles.itemsRight}>
-                        {!shareObject && (
+                        {!share_object && (
                             <Text style={styles.value}>Not available.</Text>
                         )}
+                        {share_object && status === "loading" && (
+                            <PulseIndicator
+                                color={Colors.FROST_WHITE}
+                                size={30}
+                                style={styles.value}
+                            />
+                        )}
                         {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
-                        {shareObject && loading && (
+                        {share_object && status === "fetched" && (
                             <Text style={styles.value}>
-                                {shareObject.value + "€"}
+                                {share_object.value + "€"}
                             </Text>
                         )}
-                        <AntDesign
-                            name="plussquareo"
-                            size={24}
-                            color="orange"
-                            style={{ alignSelf: "center" }}
-                        />
+                        <TouchableOpacity onPress={toggleExpanded}>
+                            <AntDesign
+                                name="plussquareo"
+                                size={24}
+                                color="orange"
+                                style={{ alignSelf: "center" }}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
-                {expanded && (
+                {expanded && share_object.historyStatus === "loading" && (
+                    <View
+                        style={{
+                            flex: 1,
+                            alignContent: "center",
+                            height: 200,
+                        }}
+                    >
+                        <PacmanIndicator
+                            color={Colors.FROST_WHITE}
+                            size={100}
+                        />
+                    </View>
+                )}
+                {expanded && share_object.historyStatus === "fetched" && (
                     <>
-                        <View style={{ flexDirection: "row", height: 200 }}>
-                            <YAxis
-                                data={data}
-                                contentInset={{ top: 20, bottom: 20 }}
-                                svg={{
-                                    fill: Colors.FROST_WHITE,
-                                    fontSize: 12,
+                        <View style={{ flexDirection: "column" }}>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    height: 200,
                                 }}
-                                numberOfTicks={10}
-                                formatLabel={(value) => `${value}€`}
-                            />
-                            <LineChart
-                                style={{ flex: 1, marginLeft: 16 }}
-                                data={data}
-                                svg={{ stroke: Colors.FROST_WHITE }}
-                                contentInset={{ top: 20, bottom: 20 }}
                             >
-                                <Grid />
-                            </LineChart>
+                                <YAxis
+                                    data={share_object.history.map(
+                                        (item) => item.price
+                                    )}
+                                    contentInset={{ top: 20, bottom: 20 }}
+                                    svg={{
+                                        fill: Colors.FROST_WHITE,
+                                        fontSize: 12,
+                                    }}
+                                    numberOfTicks={10}
+                                    formatLabel={(value) => `${value}€`}
+                                />
+                                <LineChart
+                                    style={{
+                                        flex: 1,
+                                        marginLeft: 16,
+                                        height: 200,
+                                    }}
+                                    data={share_object.history.map(
+                                        (item) => item.price
+                                    )}
+                                    svg={{ stroke: Colors.FROST_WHITE }}
+                                    contentInset={{ top: 20, bottom: 20 }}
+                                >
+                                    <Grid />
+                                </LineChart>
+                            </View>
                         </View>
                     </>
                 )}
-            </Pressable>
+            </View>
         </>
     );
 }
@@ -93,7 +130,7 @@ const styles = StyleSheet.create({
         backgroundColor: "black",
         padding: 10,
         marginBottom: 10,
-        width: "80%",
+        width: (width / 100) * 80,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
