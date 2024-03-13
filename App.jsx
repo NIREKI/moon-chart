@@ -21,19 +21,26 @@ import {
     getStockMarketHolidays,
     getStockMarketStatus,
 } from "./scripts/stock.js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
+import Queue from "promise-queue";
 
 const Stack = createNativeStackNavigator();
+// debug mode: No API Fetches
+export const debug = false;
+var maxConcurrent = 1;
+var maxQueue = Infinity;
+var queue = new Queue(maxConcurrent, maxQueue);
+
 export function HomeScreen({ navigation }) {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
-    // debug mode: No API Fetches
-    const debug = true;
-    const exchangeRate = { rate: 0, timestamp: 0 };
-    const [shareList, setShareList] = useState([
+
+    const exchangeRate = useRef({ rate: 0, timestamp: 0 });
+    const [shareList, setShareList] = useState([]);
+    const shareListData = useRef([
         {
             id: "bitcoin",
             name: "Bitcoin",
@@ -70,19 +77,10 @@ export function HomeScreen({ navigation }) {
             historyStatus: "loading",
             history: [],
         },
-        {
-            id: "ZAPP",
-            name: "Admiral Group",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
     ]);
     async function getExchangeRate() {
         // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
-        if (exchangeRate.timestamp === 0) {
+        if (exchangeRate.current.timestamp === 0) {
             let key = process.env.EXPO_PUBLIC_FREECURRENCY_API_TOKEN;
             const res = await fetch(
                 "https://api.freecurrencyapi.com/v1/latest?currencies=EUR&apikey=" +
@@ -98,12 +96,13 @@ export function HomeScreen({ navigation }) {
             );
             if (res.status === 200) {
                 const jsonData = await res.json();
-                exchangeRate.rate = jsonData.data.EUR;
+                exchangeRate.current.rate = jsonData.data.EUR;
                 // set exchangeRate.timestamp to the current time
-                exchangeRate.timestamp = Date.now();
+                exchangeRate.current.timestamp = Date.now();
             } else {
                 // Failsafe: set exchangeRate.rate to 0.92
-                exchangeRate.rate = 0.92;
+                // TODO: Show banner for error at fetch to let user know that exchange rate is set to failsafe.
+                exchangeRate.current.rate = 0.92;
             }
         } else {
             return;
@@ -111,43 +110,41 @@ export function HomeScreen({ navigation }) {
     }
 
     async function getHistory({ id, type }) {
-        // make the code pause for 0.5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // make the code pause for 0.1 seconds
+        await new Promise((resolve) => setTimeout(resolve, 100));
         if (type == "crypto") {
             let data = await getCryptoHistory({ coin_id: id });
-            setShareList(
-                shareList.map((stock) => {
-                    if (stock.id === id) {
-                        return {
-                            ...stock,
-                            historyStatus: "fetched",
-                            history: data,
-                        };
-                    } else {
-                        return stock;
-                    }
-                })
-            );
+            shareListData.current = shareListData.current.map((stock) => {
+                if (stock.id === id) {
+                    return {
+                        ...stock,
+                        historyStatus: "fetched",
+                        history: data,
+                    };
+                } else {
+                    return stock;
+                }
+            });
+            setShareList(shareListData.current);
         } else if (type == "stock") {
             // Be sure that the exchange rate is set
             await getExchangeRate();
             let data = await getStockHistory({
                 symbol: id,
-                exchangeRate: exchangeRate.rate,
+                exchangeRate: exchangeRate.current.rate,
             });
-            setShareList(
-                shareList.map((stock) => {
-                    if (stock.id === id) {
-                        return {
-                            ...stock,
-                            historyStatus: "fetched",
-                            history: data,
-                        };
-                    } else {
-                        return stock;
-                    }
-                })
-            );
+            shareListData.current = shareListData.current.map((stock) => {
+                if (stock.id === id) {
+                    return {
+                        ...stock,
+                        historyStatus: "fetched",
+                        history: data,
+                    };
+                } else {
+                    return stock;
+                }
+            });
+            setShareList(shareListData.current);
         } else {
             console.log("not found");
         }
@@ -161,75 +158,79 @@ export function HomeScreen({ navigation }) {
         async function getValueData() {
             // First be sure that a correct exchange rate is already set.
             await getExchangeRate();
-            if (shareList) {
-                var copy = shareList;
-                for (let i = 0; i < shareList.length; i++) {
-                    let id = shareList[i].id;
+            if (shareListData.current) {
+                for (let i = 0; i < shareListData.current.length; i++) {
+                    let id = shareListData.current[i].id;
                     //Crypto price is already in eur
-                    if (shareList[i].type == "crypto") {
+                    if (shareListData.current[i].type === "crypto") {
                         let data = await getCryptoHistory({ coin_id: id });
-                        copy = copy.map((stock) => {
-                            if (stock.id === id) {
-                                return {
-                                    ...stock,
-                                    value: (
-                                        Math.round(
-                                            data.slice(-1)[0].price * 100
-                                        ) / 100
-                                    ).toFixed(2),
-                                    history: data,
-                                    valueStatus: "fetched",
-                                };
-                            } else {
-                                return stock;
+                        shareListData.current = shareListData.current.map(
+                            (stock) => {
+                                if (stock.id === id) {
+                                    return {
+                                        ...stock,
+                                        value: (
+                                            Math.round(
+                                                data.slice(-1)[0].price * 100
+                                            ) / 100
+                                        ).toFixed(2),
+                                        history: data,
+                                        valueStatus: "fetched",
+                                    };
+                                } else {
+                                    return stock;
+                                }
                             }
-                        });
+                        );
                     }
                     // stock price has to be converted from usd to eur
-                    else if (shareList[i].type == "stock") {
+                    else if (shareListData.current[i].type === "stock") {
                         let data = await getCurrentStockPrice({
-                            symbol: shareList[i].id,
+                            symbol: shareListData.current[i].id,
                         });
-                        copy = copy.map((stock) => {
-                            if (stock.id === id) {
-                                return {
-                                    ...stock,
-                                    value: (
-                                        Math.round(
-                                            (exchangeRate.rate >= 1
-                                                ? data.c * exchangeRate.rate
-                                                : data.c / exchangeRate.rate) *
-                                                100
-                                        ) / 100
-                                    ).toFixed(2),
-                                    valueStatus: "fetched",
-                                };
-                            } else {
-                                return stock;
+                        shareListData.current = shareListData.current.map(
+                            (stock) => {
+                                if (stock.id === id) {
+                                    return {
+                                        ...stock,
+                                        value: (
+                                            Math.round(
+                                                (exchangeRate.rate >= 1
+                                                    ? data.c *
+                                                      exchangeRate.current.rate
+                                                    : data.c /
+                                                      exchangeRate.current
+                                                          .rate) * 100
+                                            ) / 100
+                                        ).toFixed(2),
+                                        valueStatus: "fetched",
+                                    };
+                                } else {
+                                    return stock;
+                                }
                             }
-                        });
+                        );
                     }
+                    setShareList(shareListData.current);
                 }
             }
-            //shareList muss außerhalb vom Loop geupdated werden, da der State nicht sofort geupdated wird und somit auf den alten State zugegriffen wird.
-            setShareList(copy);
         }
         if (debug) {
-            setShareList(
-                shareList.map((item) => {
-                    return {
-                        ...item,
-                        value: 10,
-                        valueStatus: "fetched",
-                        history: [
-                            { price: 10, timestamp: 0 },
-                            { price: 11, timestamp: 10 },
-                        ],
-                        historyStatus: "fetched",
-                    };
-                })
-            );
+            shareListData.current = shareListData.current.map((item) => {
+                return {
+                    ...item,
+                    value: 10,
+                    valueStatus: "fetched",
+                    history: [
+                        { price: 10, timestamp: 0 },
+                        { price: 11, timestamp: 10 },
+                    ],
+                    historyStatus: "fetched",
+                };
+            });
+            setShareList(shareListData.current);
         } else {
+            setShareList(shareListData.current);
             getValueData();
         }
     }, []);
@@ -247,6 +248,7 @@ export function HomeScreen({ navigation }) {
                         <StockCard
                             share_object={shareObject.item}
                             getHistory={getHistory}
+                            promiseQueue={queue}
                         />
                     )}
                     keyExtractor={(shareObject) => shareObject.id}
