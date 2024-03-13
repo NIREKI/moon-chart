@@ -50,3 +50,34 @@ export async function getCryptoHistory({coin_id}){
 
     
 }
+/**
+ * this function returns results from the /coins/id endpoint, which gathers a bunch of information at once.
+ * 
+ * Like:
+ * - name
+ * - description.en -> Description in english
+ * - links(.homepage) -> Link to homepage
+ * - image -> Link to icon of the currency!
+ * - genesisData -> First time currency appeared on a market
+ *  market_data.current_price.eur -> Price in eur
+ * @param {*} param0 coin_id the id that coingecko uses
+ * @returns full json with every information coinGecko can provide about this coin
+ */
+export async function getCryptoInformation({coin_id}){
+    //Activate noFetch for using example data with all information needed.
+    const noFetch = true;
+    if(noFetch){
+        return require('../data/response_1710349150233.json')
+    }
+    const res = await fetch("https://api.coingecko.com/api/v3/coins/" + coin_id, {
+        method: "GET",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+            "x-cg-demo-api-key": process.env.EXPO_PUBLIC_COIN_GECKO_API_TOKEN,
+            "Content-Type": "application/json" 
+        }
+    });
+    const jsonData = await res.json();
+    return jsonData;
+}

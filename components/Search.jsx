@@ -24,7 +24,6 @@ export default function Search({ navigation }) {
      *
      */
     function showDetails({ item }) {
-        console.log(item);
         navigation.navigate("SearchDetail", { item: item });
     }
     const [showList, setShowList] = useState(false);
@@ -132,10 +131,15 @@ function getSearchResults({ query, limit }) {
         .map((ticker) => ({
             ...ticker,
             name: ticker.name.split(" Common Stock")[0],
+            type: "stock",
         }));
     kryptoRes = getCoins()
         .filter((coin) => coin.name.toLowerCase().includes(query.toLowerCase()))
-        .slice(0, limit);
+        .slice(0, limit)
+        .map((coin) => ({
+            ...coin,
+            type: "crypto",
+        }));
     let response = [];
     if (kryptoRes.length > 0 && aktienRes.length > 0) {
         response.push({

@@ -42,24 +42,24 @@ export function HomeScreen({ navigation }) {
     const exchangeRate = useRef({ rate: 0, timestamp: 0 });
     const [shareList, setShareList] = useState([]);
     const shareListData = useRef([
-        {
-            id: "bitcoin",
-            name: "Bitcoin",
-            type: "crypto",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-        {
-            id: "ethereum",
-            name: "Ethereum",
-            type: "crypto",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
+        // {
+        //     id: "bitcoin",
+        //     name: "Bitcoin",
+        //     type: "crypto",
+        //     value: 0,
+        //     valueStatus: "loading",
+        //     historyStatus: "loading",
+        //     history: [],
+        // },
+        // {
+        //     id: "ethereum",
+        //     name: "Ethereum",
+        //     type: "crypto",
+        //     value: 0,
+        //     valueStatus: "loading",
+        //     historyStatus: "loading",
+        //     history: [],
+        // },
         {
             id: "AAPL",
             name: "Apple Inc",

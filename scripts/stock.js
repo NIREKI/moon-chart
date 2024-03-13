@@ -116,7 +116,6 @@ export async function getStockCompanyProfile( {symbol} ){
             "Content-Type": "application/json"
         }
     });
-
     const jsonData = await res.json();
     return jsonData;
 }
