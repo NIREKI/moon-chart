@@ -5,7 +5,7 @@
  * @var key muss in der .env als EXPO_PUBLIC_COIN_GECKO_API_TOKEN angegeben werden
  */
 //if true wir der fetch status in der console gelogged
-const debugAPI = false;
+const debugAPI = true;
 export default async function getCurrentCryptoPrice({coin_id}){
     const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + coin_id + "&vs_currencies=eur",{
          method: "GET",
