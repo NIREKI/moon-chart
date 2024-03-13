@@ -1,4 +1,4 @@
-const debugAPI = true;
+const debugAPI = false;
 /**
      * @returns Returned ein JSON Object wie
      * {"c": 175.26, "d": -4.4, "dp": -2.4491, "h": 176.9, "l": 173.7901, "o": 176.15, "pc": 179.66, "t": 1709582846}

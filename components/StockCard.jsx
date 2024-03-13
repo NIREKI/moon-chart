@@ -12,7 +12,6 @@ import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
 import { PacmanIndicator, PulseIndicator } from "react-native-indicators";
 import Graph from "./Graph.jsx";
-import { queue } from "../App.jsx";
 
 var width = Dimensions.get("window").width;
 
