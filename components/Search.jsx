@@ -18,6 +18,15 @@ var width = Dimensions.get("window").width;
 var height = Dimensions.get("window").height;
 
 export default function Search({ navigation }) {
+    /**
+     * Opens a new Windows and passes the selected item so the the item can be shown with more details and thus added to the list
+     * @param {item} the item that was selected
+     *
+     */
+    function showDetails({ item }) {
+        console.log(item);
+        navigation.navigate("SearchDetail", { item: item });
+    }
     const [showList, setShowList] = useState(false);
     const [results, setResults] = useState([]);
     return (
@@ -52,6 +61,7 @@ export default function Search({ navigation }) {
                                         index === section.data.length - 1 &&
                                             styles.sectionItemLast,
                                     ]}
+                                    showDetails={showDetails}
                                 />
                             )}
                             renderSectionHeader={({ section: { type } }) => (
@@ -151,6 +161,7 @@ function getSearchResults({ query, limit }) {
     }
     return response;
 }
+
 const styles = StyleSheet.create({
     searchBar: {
         borderRadius: 10,

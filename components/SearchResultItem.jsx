@@ -1,8 +1,11 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
-export default function SearchResultItem({ item, style }) {
+export default function SearchResultItem({ item, style, showDetails }) {
     return (
-        <TouchableOpacity style={style}>
+        <TouchableOpacity
+            style={style}
+            onPress={() => showDetails({ item: item })}
+        >
             <Text style={styles.name}>{item.name}</Text>
         </TouchableOpacity>
     );

@@ -26,6 +26,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
 import Queue from "promise-queue";
+import SearchDetail from "./components/SearchDetail.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
@@ -279,15 +280,20 @@ export default function App() {
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                <Stack.Screen
+                {/* <Stack.Screen
                     name="Home"
                     component={HomeScreen}
                     options={{ headerShown: false }}
-                />
+                /> */}
                 <Stack.Screen
                     name="Search"
                     component={Search}
                     options={{ title: "Suche" }}
+                />
+                <Stack.Screen
+                    name="SearchDetail"
+                    component={SearchDetail}
+                    options={{ title: "Details" }}
                 />
             </Stack.Navigator>
         </NavigationContainer>
