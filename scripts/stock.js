@@ -1,3 +1,4 @@
+const debugAPI = false;
 /**
      * @returns Returned ein JSON Object wie
      * {"c": 175.26, "d": -4.4, "dp": -2.4491, "h": 176.9, "l": 173.7901, "o": 176.15, "pc": 179.66, "t": 1709582846}
@@ -25,6 +26,9 @@ export async function getCurrentStockPrice( {symbol} ){
             "Content-Type": "application/json"
         }
     });
+    if(debugAPI){
+        console.log("Stock Price: ", res.status);
+    }
     if(res.status !== 200){
         console.log("Error")
     }
@@ -143,6 +147,9 @@ export async function getStockHistory( {symbol, exchangeRate} ){
             "Content-Type": "application/json"
         }
     });
+    if(debugAPI){
+        console.log("Stock history: ", res.status);
+    }
     if(res.status === 429){
         // TODO: Handle too many requests error. Only 5 requests per minute allowed.
         return null;

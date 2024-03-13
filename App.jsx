@@ -27,11 +27,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
 
 const Stack = createNativeStackNavigator();
+// debug mode: No API Fetches
+export const debug = false;
+
 export function HomeScreen({ navigation }) {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
-    // debug mode: No API Fetches
-    const debug = true;
+
     const exchangeRate = { rate: 0, timestamp: 0 };
     const [shareList, setShareList] = useState([
         {
@@ -64,15 +66,6 @@ export function HomeScreen({ navigation }) {
         {
             id: "MSFT",
             name: "Microsoft Corp",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-        {
-            id: "ZAPP",
-            name: "Admiral Group",
             type: "stock",
             value: 0,
             valueStatus: "loading",
