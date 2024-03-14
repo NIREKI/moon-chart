@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     View,
     FlatList,
+    ToastAndroid,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -80,6 +81,21 @@ export function HomeScreen({ route, navigation }) {
         },
     ]);
     async function addToHomescreen({ itemId, itemName, itemType }) {
+        let duplicate = false;
+
+        shareListData.current.forEach((item) => {
+            if (item.id === itemId) {
+                duplicate = true;
+            }
+        });
+
+        if (duplicate) {
+            ToastAndroid.show(
+                itemName + " wurde bereits hinzugefügt.",
+                ToastAndroid.LONG
+            );
+            return;
+        }
         shareListData.current.push({
             id: itemId,
             name: itemName,
@@ -90,6 +106,7 @@ export function HomeScreen({ route, navigation }) {
             history: [],
         });
         setShareList(shareListData.current);
+        ToastAndroid.show(itemName + " wurde hinzugefügt.", ToastAndroid.LONG);
         await getData({ id: route.params.add.id, type: route.params.add.type });
         setShareList(shareListData.current);
         async function getData({ id, type }) {

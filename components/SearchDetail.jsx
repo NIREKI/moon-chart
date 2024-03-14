@@ -26,7 +26,7 @@ const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 export default function SearchDetail({ route, navigation }) {
     const [info, setInfo] = useState();
-    const [visible, setVisible] = useState(true);
+    const [loading, setLoading] = useState(true);
     let item = route.params.item;
     function StockDetail({ item }) {
         return (
@@ -125,10 +125,6 @@ export default function SearchDetail({ route, navigation }) {
                             {/* In this view the buttons for adding the currency to the list are handled */}
                             <TouchableOpacity
                                 onPress={() => {
-                                    ToastAndroid.show(
-                                        info.name + " wird hinzugefügt",
-                                        ToastAndroid.LONG
-                                    );
                                     navigation.navigate("Home", {
                                         add: {
                                             id: info.ticker,
@@ -258,10 +254,6 @@ export default function SearchDetail({ route, navigation }) {
                             {/* In this view the buttons for adding the currency to the list are handled */}
                             <TouchableOpacity
                                 onPress={() => {
-                                    ToastAndroid.show(
-                                        info.name + " wird hinzugefügt",
-                                        ToastAndroid.LONG
-                                    );
                                     navigation.navigate("Home", {
                                         add: {
                                             id: info.id,
