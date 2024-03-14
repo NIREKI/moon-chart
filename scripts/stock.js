@@ -39,7 +39,6 @@ export async function getCurrentStockPrice( {symbol} ){
         console.log("Finnhub Rate Limit Exceeded");
     }
     const jsonData = await res.json();
-
     return jsonData;
     
 }
@@ -160,7 +159,7 @@ export async function getStockHistory( {symbol, exchangeRate} ){
         return null;
     } else if (res.status === 200){
         const jsonData = await res.json();
-        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: (exchangeRate >= 1) ? item.vw * exchangeRate : item.vw / exchangeRate}));
+        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: item.vw * exchangeRate}));
         return filteredResults;
     }
     

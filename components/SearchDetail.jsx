@@ -7,9 +7,7 @@ import {
     getStockCompanyProfile,
 } from "../scripts/stock.js";
 import { useEffect, useState } from "react";
-import getCurrentCryptoPrice, {
-    getCryptoInformation,
-} from "../scripts/crypto.js";
+import { getCryptoInformation } from "../scripts/crypto.js";
 import { SvgUri } from "react-native-svg";
 import { BallIndicator } from "react-native-indicators";
 
@@ -28,6 +26,7 @@ const height = Dimensions.get("window").height;
 export default function SearchDetail({ route, navigation }) {
     const [info, setInfo] = useState();
     let item = route.params.item;
+    let exR = route.params.exchangeRate.current.rate;
     function StockDetail({ item }) {
         return (
             <View style={styles.container}>
@@ -73,7 +72,7 @@ export default function SearchDetail({ route, navigation }) {
                                 <View style={styles.iconContainer}>
                                     <SvgUri
                                         width={70}
-                                        height={50}
+                                        height={70}
                                         uri={info.logo}
                                     />
                                 </View>
@@ -82,9 +81,8 @@ export default function SearchDetail({ route, navigation }) {
                             <DetailRow
                                 description="Aktueller Preis"
                                 value={
-                                    (
-                                        Math.round(info.currentPrice * 100) /
-                                        100
+                                    Math.round(
+                                        (info.currentPrice * exR * 100) / 100
                                     ).toFixed(2) + "€"
                                 }
                             />
@@ -92,7 +90,8 @@ export default function SearchDetail({ route, navigation }) {
                                 description="24-Stunden-Hoch"
                                 value={
                                     (
-                                        Math.round(info.high_24h * 100) / 100
+                                        Math.round(info.high_24h * exR * 100) /
+                                        100
                                     ).toFixed(2) + "€"
                                 }
                             />
@@ -100,7 +99,8 @@ export default function SearchDetail({ route, navigation }) {
                                 description="Schließwert Gestern"
                                 value={
                                     (
-                                        Math.round(info.prevClose * 100) / 100
+                                        Math.round(info.prevClose * exR * 100) /
+                                        100
                                     ).toFixed(2) + "€"
                                 }
                             />
@@ -125,26 +125,20 @@ export default function SearchDetail({ route, navigation }) {
                                 value={info.website}
                             />
                         </ScrollView>
-                        <View style={styles.buttonContainer}>
-                            {/* In this view the buttons for adding the currency to the list are handled */}
-                            <TouchableOpacity
-                                onPress={() => {
-                                    navigation.navigate("Home", {
-                                        add: {
-                                            id: info.ticker,
-                                            name: info.name,
-                                            type: "stock",
-                                        },
-                                    });
-                                }}
-                            >
-                                <View>
-                                    <Text style={styles.buttonText}>
-                                        Hinzufügen
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate("Home", {
+                                    add: {
+                                        id: info.ticker,
+                                        name: info.name,
+                                        type: "stock",
+                                    },
+                                });
+                            }}
+                            style={styles.buttonContainer}
+                        >
+                            <Text style={styles.buttonText}>Hinzufügen</Text>
+                        </TouchableOpacity>
                     </>
                 )}
             </View>
@@ -258,28 +252,23 @@ export default function SearchDetail({ route, navigation }) {
                                 value={info.genesis_date}
                             />
                         </ScrollView>
-                        <View style={styles.buttonContainer}>
-                            {/* In this view the buttons for adding the currency to the list are handled */}
-                            <TouchableOpacity
-                                onPress={() => {
-                                    navigation.navigate("Home", {
-                                        add: {
-                                            id: info.id,
-                                            name: info.name,
-                                            type: "crypto",
-                                        },
-                                    });
-                                }}
-                            >
-                                <View>
-                                    <Text style={styles.buttonText}>
-                                        Hinzufügen
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity
+                            onPress={() => {
+                                navigation.navigate("Home", {
+                                    add: {
+                                        id: info.id,
+                                        name: info.name,
+                                        type: "crypto",
+                                    },
+                                });
+                            }}
+                            style={styles.buttonContainer}
+                        >
+                            <Text style={styles.buttonText}>Hinzufügen</Text>
+                        </TouchableOpacity>
                     </>
                 )}
+                {/* The button for adding something to the home screen*/}
             </View>
         );
     }
@@ -316,10 +305,20 @@ export default function SearchDetail({ route, navigation }) {
     //get passed item param to use it's data for showing the details and fetching missing information
 
     return (
-        <View>
+        <View style={{ width: width, height: height, flex: 1 }}>
             {!info && <LoadingScreen />}
-            {item.type === "stock" && <StockDetail item={item} />}
-            {item.type === "crypto" && <CryptoDetail item={item} />}
+            {item.type === "stock" && (
+                <StockDetail
+                    item={item}
+                    style={{ width: width, height: height }}
+                />
+            )}
+            {item.type === "crypto" && (
+                <CryptoDetail
+                    item={item}
+                    style={{ width: width, height: height }}
+                />
+            )}
         </View>
     );
 }
@@ -349,7 +348,7 @@ const styles = StyleSheet.create({
         color: Colors.BRIGHT_BLUE,
     },
     container: {
-        flexDirection: "column",
+        flex: 1,
         width: width,
         height: height,
         backgroundColor: "#fff",
@@ -398,9 +397,9 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: "row",
         position: "absolute",
-        bottom: 80,
+        bottom: (height / 100) * 2,
         right: 15,
-        backgroundColor: "#00cc00",
+        backgroundColor: Colors.BRIGHT_BLUE,
         padding: 20,
         borderRadius: 20,
         justifyContent: "center",

@@ -26,6 +26,7 @@ export default function Search({ route, navigation }) {
     function showDetails({ item }) {
         navigation.navigate("SearchDetail", {
             item: item,
+            exchangeRate: route.params.exchangeRate,
         });
     }
     const [showList, setShowList] = useState(false);

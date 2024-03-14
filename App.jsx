@@ -35,11 +35,9 @@ export const debug = true;
 var maxConcurrent = 1;
 var maxQueue = Infinity;
 var queue = new Queue(maxConcurrent, maxQueue);
-
+var width = Dimensions.get("window").width;
+var height = Dimensions.get("window").height;
 export function HomeScreen({ route, navigation }) {
-    var width = Dimensions.get("window").width;
-    var height = Dimensions.get("window").height;
-
     const exchangeRate = useRef({ rate: 0, timestamp: 0 });
     const [shareList, setShareList] = useState([]);
     const shareListData = useRef([
@@ -121,10 +119,7 @@ export function HomeScreen({ route, navigation }) {
                             ...stock,
                             value: (
                                 Math.round(
-                                    (exchangeRate.current.rate >= 1
-                                        ? data.c * exchangeRate.current.rate
-                                        : data.c / exchangeRate.current.rate) *
-                                        100
+                                    data.c * exchangeRate.current.rate * 100
                                 ) / 100
                             ).toFixed(2),
                             valueStatus: "fetched",
@@ -280,12 +275,9 @@ export function HomeScreen({ route, navigation }) {
                                         ...stock,
                                         value: (
                                             Math.round(
-                                                (exchangeRate.current.rate >= 1
-                                                    ? data.c *
-                                                      exchangeRate.current.rate
-                                                    : data.c /
-                                                      exchangeRate.current
-                                                          .rate) * 100
+                                                data.c *
+                                                    exchangeRate.current.rate *
+                                                    100
                                             ) / 100
                                         ).toFixed(2),
                                         valueStatus: "fetched",
@@ -301,6 +293,7 @@ export function HomeScreen({ route, navigation }) {
             }
         }
         if (debug) {
+            getExchangeRate();
             shareListData.current = shareListData.current.map((item) => {
                 return {
                     ...item,
@@ -342,7 +335,11 @@ export function HomeScreen({ route, navigation }) {
             {/* Floating Search button */}
             <TouchableOpacity
                 style={styles.floatingSearchButton}
-                onPress={() => navigation.navigate("Search")}
+                onPress={() =>
+                    navigation.navigate("Search", {
+                        exchangeRate: exchangeRate,
+                    })
+                }
             >
                 <Text
                     style={{
@@ -389,7 +386,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "white",
         alignItems: "center",
-        width: "100%",
+        width: width,
         //justifyContent: "flex-start",
     },
     header: {
@@ -401,11 +398,11 @@ const styles = StyleSheet.create({
     floatingSearchButton: {
         flexDirection: "row",
         position: "absolute",
-        bottom: 10,
+        bottom: (height / 100) * 2,
         right: 15,
-        backgroundColor: "black",
+        backgroundColor: Colors.BRIGHT_BLUE,
         padding: 20,
         borderRadius: 20,
-        textAlign: "center",
+        justifyContent: "center",
     },
 });
