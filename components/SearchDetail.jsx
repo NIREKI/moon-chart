@@ -2,9 +2,15 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Dimensions, ToastAndroid } from "react-native";
 import Colors from "../Colors";
-import { getStockCompanyProfile } from "../scripts/stock.js";
+import {
+    getCurrentStockPrice,
+    getStockCompanyProfile,
+} from "../scripts/stock.js";
 import { useEffect, useState } from "react";
-import { getCryptoInformation } from "../scripts/crypto.js";
+import getCurrentCryptoPrice, {
+    getCryptoInformation,
+} from "../scripts/crypto.js";
+import { SvgUri } from "react-native-svg";
 
 /**
  * This Comopnent shows a detail page for the selected stock or crypto item in the search list.
@@ -24,13 +30,121 @@ export default function SearchDetail({ route, navigation }) {
     let item = route.params.item;
     function StockDetail({ item }) {
         return (
-            <View>
+            <View style={styles.container}>
                 {info && (
                     <>
-                        <Text style={styles.title}>{item.name}</Text>
-                        <Text style={styles.information}>
-                            Sektor: {info.finnhubIndustry}
-                        </Text>
+                        <ScrollView>
+                            <View style={styles.header}>
+                                <View style={styles.titleContainer}>
+                                    <Text style={styles.title}>
+                                        {info.name}
+                                    </Text>
+                                    {info.percentChange > 0 && (
+                                        <Text
+                                            style={
+                                                styles.headerPriceChangePositive
+                                            }
+                                        >
+                                            {(
+                                                Math.round(
+                                                    info.percentChange * 100
+                                                ) / 100
+                                            ).toFixed(2) + "%"}
+                                        </Text>
+                                    )}
+                                    {info.percentChange <= 0 && (
+                                        <Text
+                                            style={
+                                                styles.headerPriceChangeNegative
+                                            }
+                                        >
+                                            {(
+                                                Math.round(
+                                                    info.percentChange * 100
+                                                ) / 100
+                                            ).toFixed(2) + "%"}
+                                        </Text>
+                                    )}
+                                </View>
+                                <View style={styles.iconContainer}>
+                                    <SvgUri
+                                        width={70}
+                                        height={50}
+                                        uri={info.logo}
+                                    />
+                                </View>
+                            </View>
+                            {/** Alles in EUR umwandeln, da werte in USD sind! */}
+                            <DetailRow
+                                description="Aktueller Preis"
+                                value={
+                                    (
+                                        Math.round(info.currentPrice * 100) /
+                                        100
+                                    ).toFixed(2) + "€"
+                                }
+                            />
+                            <DetailRow
+                                description="24-Stunden-Hoch"
+                                value={
+                                    (
+                                        Math.round(info.high_24h * 100) / 100
+                                    ).toFixed(2) + "€"
+                                }
+                            />
+                            <DetailRow
+                                description="Schließwert Gestern"
+                                value={
+                                    (
+                                        Math.round(info.prevClose * 100) / 100
+                                    ).toFixed(2) + "€"
+                                }
+                            />
+                            <DetailRow
+                                description="Ticker Symbol"
+                                value={info.ticker}
+                            />
+                            <DetailRow
+                                description="Ursprungsland"
+                                value={info.country}
+                            />
+                            <DetailRow
+                                description="Börsengang"
+                                value={info.ipo}
+                            />
+                            <DetailRow
+                                description="Industrie"
+                                value={info.industry}
+                            />
+                            <DetailRow
+                                description="Website"
+                                value={info.website}
+                            />
+                        </ScrollView>
+                        <View style={styles.buttonContainer}>
+                            {/* In this view the buttons for adding the currency to the list are handled */}
+                            <TouchableOpacity
+                                onPress={() => {
+                                    ToastAndroid.show(
+                                        info.name + " wird hinzugefügt",
+                                        ToastAndroid.LONG
+                                    );
+                                    navigation.navigate("Home", {
+                                        add: {
+                                            id: info.ticker,
+                                            name: info.name,
+                                            type: "stock",
+                                        },
+                                    });
+                                }}
+                            >
+                                <View>
+                                    <Text style={styles.buttonText}>
+                                        Hinzufügen
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </>
                 )}
             </View>
@@ -172,7 +286,20 @@ export default function SearchDetail({ route, navigation }) {
     useEffect(() => {
         async function getStockData() {
             let data = await getStockCompanyProfile({ symbol: item.symbol });
-            setInfo(data);
+            let priceData = await getCurrentStockPrice({ symbol: item.symbol });
+            setInfo({
+                currentPrice: priceData.c,
+                percentChange: priceData.dp,
+                high_24h: priceData.h,
+                prevClose: priceData.pc,
+                industry: data.finnhubIndustry,
+                ipo: data.ipo,
+                logo: data.logo,
+                name: data.name,
+                ticker: data.ticker,
+                country: data.country,
+                website: data.weburl,
+            });
         }
 
         async function getCryptoData() {

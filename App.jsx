@@ -94,8 +94,9 @@ export function HomeScreen({ route, navigation }) {
         setShareList(shareListData.current);
         async function getData({ id, type }) {
             if (type === "stock") {
+                await getExchangeRate();
                 let data = await getCurrentStockPrice({
-                    symbol: shareListData.current[i].id,
+                    symbol: id,
                 });
                 shareListData.current = shareListData.current.map((stock) => {
                     if (stock.id === id) {
@@ -103,7 +104,7 @@ export function HomeScreen({ route, navigation }) {
                             ...stock,
                             value: (
                                 Math.round(
-                                    (exchangeRate.rate >= 1
+                                    (exchangeRate.current.rate >= 1
                                         ? data.c * exchangeRate.current.rate
                                         : data.c / exchangeRate.current.rate) *
                                         100
@@ -262,7 +263,7 @@ export function HomeScreen({ route, navigation }) {
                                         ...stock,
                                         value: (
                                             Math.round(
-                                                (exchangeRate.rate >= 1
+                                                (exchangeRate.current.rate >= 1
                                                     ? data.c *
                                                       exchangeRate.current.rate
                                                     : data.c /
