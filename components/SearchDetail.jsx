@@ -81,8 +81,10 @@ export default function SearchDetail({ route, navigation }) {
                             <DetailRow
                                 description="Aktueller Preis"
                                 value={
-                                    Math.round(
-                                        (info.currentPrice * exR * 100) / 100
+                                    (
+                                        Math.round(
+                                            info.currentPrice * exR * 100
+                                        ) / 100
                                     ).toFixed(2) + "€"
                                 }
                             />
