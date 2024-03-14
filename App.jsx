@@ -31,7 +31,7 @@ import SearchDetail from "./components/SearchDetail.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
-export const debug = true;
+export const debug = false;
 var maxConcurrent = 1;
 var maxQueue = Infinity;
 var queue = new Queue(maxConcurrent, maxQueue);
