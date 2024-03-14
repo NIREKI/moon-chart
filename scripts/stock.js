@@ -10,13 +10,15 @@ const debugAPI = false;
      * o: Open Wert
      * pc: previous close
      * t: timestamp der Daten.
-     * @copyright finnhub
+     * @copyright finnhub https://finnhub.io/docs/api/quote
      * @param {string} symbol Das Symbol der Aktie, zB AAPL für Apple
      * @var key Muss in der .env als EXPO_PUBLIC_FINNHUB_API_TOKEN angegeben werden
      */
 export async function getCurrentStockPrice( {symbol} ){
-    // using the finnhub quote endpoint: https://finnhub.io/api/v1/quote?symbol=&token=
-    //https://finnhub.io/docs/api/quote
+    var noFetch = false;
+    if(noFetch) {
+        return(require('../data/finnhuh_quote.json'));
+    }
     let key = process.env.EXPO_PUBLIC_FINNHUB_API_TOKEN;
     const res = await fetch("https://finnhub.io/api/v1/quote?symbol=" + symbol + "&token=" + key, {
         method: "GET",
@@ -107,6 +109,10 @@ export async function getStockMarketHolidays() {
  * @param {*} param0 
  */
 export async function getStockCompanyProfile( {symbol} ){
+    var noFetch = false;
+    if(noFetch) {
+        return(require('../data/finnhub_profile2.json'));
+    }
     let key = process.env.EXPO_PUBLIC_FINNHUB_API_TOKEN;
     const res = await fetch("https://finnhub.io/api/v1/stock/profile2?symbol=" + symbol + "&token=" + key, {
         method: "GET",

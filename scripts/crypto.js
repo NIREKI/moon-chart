@@ -65,7 +65,7 @@ export async function getCryptoHistory({coin_id}){
  */
 export async function getCryptoInformation({coin_id}){
     //Activate noFetch for using example data with all information needed.
-    const noFetch = true;
+    const noFetch = false;
     if(noFetch){
         return require('../data/response_1710349150233.json')
     }

@@ -17,14 +17,16 @@ import Colors from "../Colors.jsx";
 var width = Dimensions.get("window").width;
 var height = Dimensions.get("window").height;
 
-export default function Search({ navigation }) {
+export default function Search({ route, navigation }) {
     /**
      * Opens a new Windows and passes the selected item so the the item can be shown with more details and thus added to the list
      * @param {item} the item that was selected
      *
      */
     function showDetails({ item }) {
-        navigation.navigate("SearchDetail", { item: item });
+        navigation.navigate("SearchDetail", {
+            item: item,
+        });
     }
     const [showList, setShowList] = useState(false);
     const [results, setResults] = useState([]);

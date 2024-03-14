@@ -30,12 +30,12 @@ import SearchDetail from "./components/SearchDetail.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
-export const debug = false;
+export const debug = true;
 var maxConcurrent = 1;
 var maxQueue = Infinity;
 var queue = new Queue(maxConcurrent, maxQueue);
 
-export function HomeScreen({ navigation }) {
+export function HomeScreen({ route, navigation }) {
     var width = Dimensions.get("window").width;
     var height = Dimensions.get("window").height;
 
@@ -79,6 +79,61 @@ export function HomeScreen({ navigation }) {
             history: [],
         },
     ]);
+    async function addToHomescreen({ itemId, itemName, itemType }) {
+        shareListData.current.push({
+            id: itemId,
+            name: itemName,
+            type: itemType,
+            value: 0,
+            valueStatus: "loading",
+            historyStatus: "loading",
+            history: [],
+        });
+        setShareList(shareListData.current);
+        await getData({ id: route.params.add.id, type: route.params.add.type });
+        setShareList(shareListData.current);
+        async function getData({ id, type }) {
+            if (type === "stock") {
+                let data = await getCurrentStockPrice({
+                    symbol: shareListData.current[i].id,
+                });
+                shareListData.current = shareListData.current.map((stock) => {
+                    if (stock.id === id) {
+                        return {
+                            ...stock,
+                            value: (
+                                Math.round(
+                                    (exchangeRate.rate >= 1
+                                        ? data.c * exchangeRate.current.rate
+                                        : data.c / exchangeRate.current.rate) *
+                                        100
+                                ) / 100
+                            ).toFixed(2),
+                            valueStatus: "fetched",
+                        };
+                    } else {
+                        return stock;
+                    }
+                });
+            } else if (type === "crypto") {
+                let data = await getCryptoHistory({ coin_id: id });
+                shareListData.current = shareListData.current.map((crypto) => {
+                    if (crypto.id === id) {
+                        return {
+                            ...crypto,
+                            value: (
+                                Math.round(data.slice(-1)[0].price * 100) / 100
+                            ).toFixed(2),
+                            history: data,
+                            valueStatus: "fetched",
+                        };
+                    } else {
+                        return crypto;
+                    }
+                });
+            }
+        }
+    }
     async function getExchangeRate() {
         // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
         if (exchangeRate.current.timestamp === 0) {
@@ -150,6 +205,17 @@ export function HomeScreen({ navigation }) {
             console.log("not found");
         }
     }
+    useEffect(() => {
+        if (route.params) {
+            if (route.params.add) {
+                addToHomescreen({
+                    itemId: route.params.add.id,
+                    itemName: route.params.add.name,
+                    itemType: route.params.add.type,
+                });
+            }
+        }
+    }, [route]);
     useEffect(() => {
         /**
          * Fetches the value of each stock and crypto in the shareList array
@@ -280,11 +346,11 @@ export default function App() {
     return (
         <NavigationContainer>
             <Stack.Navigator>
-                {/* <Stack.Screen
+                <Stack.Screen
                     name="Home"
                     component={HomeScreen}
                     options={{ headerShown: false }}
-                /> */}
+                />
                 <Stack.Screen
                     name="Search"
                     component={Search}
