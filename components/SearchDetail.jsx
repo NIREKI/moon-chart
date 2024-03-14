@@ -11,6 +11,7 @@ import getCurrentCryptoPrice, {
     getCryptoInformation,
 } from "../scripts/crypto.js";
 import { SvgUri } from "react-native-svg";
+import { BallIndicator } from "react-native-indicators";
 
 /**
  * This Comopnent shows a detail page for the selected stock or crypto item in the search list.
@@ -26,7 +27,6 @@ const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 export default function SearchDetail({ route, navigation }) {
     const [info, setInfo] = useState();
-    const [loading, setLoading] = useState(true);
     let item = route.params.item;
     function StockDetail({ item }) {
         return (
@@ -45,11 +45,13 @@ export default function SearchDetail({ route, navigation }) {
                                                 styles.headerPriceChangePositive
                                             }
                                         >
-                                            {(
-                                                Math.round(
-                                                    info.percentChange * 100
-                                                ) / 100
-                                            ).toFixed(2) + "%"}
+                                            {"📈" +
+                                                (
+                                                    Math.round(
+                                                        info.percentChange * 100
+                                                    ) / 100
+                                                ).toFixed(2) +
+                                                "%"}
                                         </Text>
                                     )}
                                     {info.percentChange <= 0 && (
@@ -58,11 +60,13 @@ export default function SearchDetail({ route, navigation }) {
                                                 styles.headerPriceChangeNegative
                                             }
                                         >
-                                            {(
-                                                Math.round(
-                                                    info.percentChange * 100
-                                                ) / 100
-                                            ).toFixed(2) + "%"}
+                                            {"📉" +
+                                                (
+                                                    Math.round(
+                                                        info.percentChange * 100
+                                                    ) / 100
+                                                ).toFixed(2) +
+                                                "%"}
                                         </Text>
                                     )}
                                 </View>
@@ -165,13 +169,15 @@ export default function SearchDetail({ route, navigation }) {
                                                 styles.headerPriceChangePositive
                                             }
                                         >
-                                            {(
-                                                Math.round(
-                                                    info.market_data
-                                                        .price_change_percentage_24h *
-                                                        100
-                                                ) / 100
-                                            ).toFixed(2) + "%"}
+                                            {"📈" +
+                                                (
+                                                    Math.round(
+                                                        info.market_data
+                                                            .price_change_percentage_24h *
+                                                            100
+                                                    ) / 100
+                                                ).toFixed(2) +
+                                                "%"}
                                         </Text>
                                     )}
                                     {info.market_data
@@ -181,13 +187,15 @@ export default function SearchDetail({ route, navigation }) {
                                                 styles.headerPriceChangeNegative
                                             }
                                         >
-                                            {(
-                                                Math.round(
-                                                    info.market_data
-                                                        .price_change_percentage_24h *
-                                                        100
-                                                ) / 100
-                                            ).toFixed(2) + "%"}
+                                            {"📉" +
+                                                (
+                                                    Math.round(
+                                                        info.market_data
+                                                            .price_change_percentage_24h *
+                                                            100
+                                                    ) / 100
+                                                ).toFixed(2) +
+                                                "%"}
                                         </Text>
                                     )}
                                 </View>
@@ -309,6 +317,7 @@ export default function SearchDetail({ route, navigation }) {
 
     return (
         <View>
+            {!info && <LoadingScreen />}
             {item.type === "stock" && <StockDetail item={item} />}
             {item.type === "crypto" && <CryptoDetail item={item} />}
         </View>
@@ -319,6 +328,17 @@ function DetailRow({ description, value }) {
         <View style={styles.informationContainer}>
             <Text style={styles.informationDesc}>{description}</Text>
             <Text style={styles.information}>{value}</Text>
+        </View>
+    );
+}
+
+function LoadingScreen() {
+    return (
+        <View style={[styles.container, { alignItems: "center" }]}>
+            <BallIndicator
+                color={Colors.BRIGHT_BLUE}
+                style={{ width: 150, height: 150 }}
+            />
         </View>
     );
 }
@@ -343,8 +363,9 @@ const styles = StyleSheet.create({
     information: {
         fontSize: 18,
         color: "#000",
-        marginRight: 10,
+        marginRight: 20,
         textAlign: "right",
+        width: (width / 100) * 50,
     },
     informationDesc: {
         fontSize: 18,
@@ -363,9 +384,11 @@ const styles = StyleSheet.create({
     },
     headerPriceChangeNegative: {
         color: "#EE473A",
+        fontWeight: "bold",
     },
     headerPriceChangePositive: {
         color: "#86B752",
+        fontWeight: "bold",
     },
     iconContainer: {
         height: 50,
