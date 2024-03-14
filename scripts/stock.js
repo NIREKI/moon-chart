@@ -1,3 +1,4 @@
+const debugAPI = false;
 /**
      * @returns Returned ein JSON Object wie
      * {"c": 175.26, "d": -4.4, "dp": -2.4491, "h": 176.9, "l": 173.7901, "o": 176.15, "pc": 179.66, "t": 1709582846}
@@ -9,13 +10,15 @@
      * o: Open Wert
      * pc: previous close
      * t: timestamp der Daten.
-     * @copyright finnhub
+     * @copyright finnhub https://finnhub.io/docs/api/quote
      * @param {string} symbol Das Symbol der Aktie, zB AAPL für Apple
      * @var key Muss in der .env als EXPO_PUBLIC_FINNHUB_API_TOKEN angegeben werden
      */
 export async function getCurrentStockPrice( {symbol} ){
-    // using the finnhub quote endpoint: https://finnhub.io/api/v1/quote?symbol=&token=
-    //https://finnhub.io/docs/api/quote
+    var noFetch = false;
+    if(noFetch) {
+        return(require('../data/finnhuh_quote.json'));
+    }
     let key = process.env.EXPO_PUBLIC_FINNHUB_API_TOKEN;
     const res = await fetch("https://finnhub.io/api/v1/quote?symbol=" + symbol + "&token=" + key, {
         method: "GET",
@@ -25,6 +28,9 @@ export async function getCurrentStockPrice( {symbol} ){
             "Content-Type": "application/json"
         }
     });
+    if(debugAPI){
+        console.log("Stock Price: ", res.status);
+    }
     if(res.status !== 200){
         console.log("Error")
     }
@@ -33,7 +39,6 @@ export async function getCurrentStockPrice( {symbol} ){
         console.log("Finnhub Rate Limit Exceeded");
     }
     const jsonData = await res.json();
-
     return jsonData;
     
 }
@@ -103,6 +108,10 @@ export async function getStockMarketHolidays() {
  * @param {*} param0 
  */
 export async function getStockCompanyProfile( {symbol} ){
+    var noFetch = false;
+    if(noFetch) {
+        return(require('../data/finnhub_profile2.json'));
+    }
     let key = process.env.EXPO_PUBLIC_FINNHUB_API_TOKEN;
     const res = await fetch("https://finnhub.io/api/v1/stock/profile2?symbol=" + symbol + "&token=" + key, {
         method: "GET",
@@ -112,7 +121,6 @@ export async function getStockCompanyProfile( {symbol} ){
             "Content-Type": "application/json"
         }
     });
-
     const jsonData = await res.json();
     return jsonData;
 }
@@ -143,12 +151,15 @@ export async function getStockHistory( {symbol, exchangeRate} ){
             "Content-Type": "application/json"
         }
     });
+    if(debugAPI){
+        console.log("Stock history: ", res.status);
+    }
     if(res.status === 429){
         // TODO: Handle too many requests error. Only 5 requests per minute allowed.
         return null;
     } else if (res.status === 200){
         const jsonData = await res.json();
-        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: (exchangeRate >= 1) ? item.vw * exchangeRate : item.vw / exchangeRate}));
+        const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: item.vw * exchangeRate}));
         return filteredResults;
     }
     

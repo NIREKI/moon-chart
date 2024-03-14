@@ -11,17 +11,24 @@ import Colors from "../Colors.jsx";
 import { AntDesign } from "@expo/vector-icons";
 import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
 import { PacmanIndicator, PulseIndicator } from "react-native-indicators";
+import Graph from "./Graph.jsx";
 
 var width = Dimensions.get("window").width;
 
-export default function StockCard({ share_object, getHistory }) {
+export default function StockCard({ share_object, getHistory, promiseQueue }) {
     const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
     const [status, setStatus] = useState("");
+
     const toggleExpanded = () => {
         // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
         if (share_object.historyStatus === "loading") {
-            getHistory({ id: share_object.id, type: share_object.type });
+            promiseQueue.add(function () {
+                return getHistory({
+                    id: share_object.id,
+                    type: share_object.type,
+                });
+            });
         }
         setExpanded(!expanded);
     };
@@ -81,43 +88,7 @@ export default function StockCard({ share_object, getHistory }) {
                     </View>
                 )}
                 {expanded && share_object.historyStatus === "fetched" && (
-                    <>
-                        <View style={{ flexDirection: "column" }}>
-                            <View
-                                style={{
-                                    flexDirection: "row",
-                                    height: 200,
-                                }}
-                            >
-                                <YAxis
-                                    data={share_object.history.map(
-                                        (item) => item.price
-                                    )}
-                                    contentInset={{ top: 20, bottom: 20 }}
-                                    svg={{
-                                        fill: Colors.FROST_WHITE,
-                                        fontSize: 12,
-                                    }}
-                                    numberOfTicks={10}
-                                    formatLabel={(value) => `${value}€`}
-                                />
-                                <LineChart
-                                    style={{
-                                        flex: 1,
-                                        marginLeft: 16,
-                                        height: 200,
-                                    }}
-                                    data={share_object.history.map(
-                                        (item) => item.price
-                                    )}
-                                    svg={{ stroke: Colors.FROST_WHITE }}
-                                    contentInset={{ top: 20, bottom: 20 }}
-                                >
-                                    <Grid />
-                                </LineChart>
-                            </View>
-                        </View>
-                    </>
+                    <Graph share_object={share_object} />
                 )}
             </View>
         </>
