@@ -142,7 +142,6 @@ export function HomeScreen({ route, navigation }) {
                             value: (
                                 Math.round(itemInfo.currentPrice * 100) / 100
                             ).toFixed(2),
-                            history: data,
                             valueStatus: "fetched",
                         };
                     } else {
