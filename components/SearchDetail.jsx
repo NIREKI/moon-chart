@@ -134,6 +134,7 @@ export default function SearchDetail({ route, navigation }) {
                                         id: info.ticker,
                                         name: info.name,
                                         type: "stock",
+                                        fullInfo: info,
                                     },
                                 });
                             }}
@@ -247,6 +248,7 @@ export default function SearchDetail({ route, navigation }) {
                                         id: info.id,
                                         name: info.name,
                                         type: "crypto",
+                                        fullInfo: info,
                                     },
                                 });
                             }}
