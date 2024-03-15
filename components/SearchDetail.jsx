@@ -158,8 +158,7 @@ export default function SearchDetail({ route, navigation }) {
                                     <Text style={styles.title}>
                                         {info.name}
                                     </Text>
-                                    {info.market_data
-                                        .price_change_percentage_24h > 0 && (
+                                    {info.percentChange > 0 && (
                                         <Text
                                             style={
                                                 styles.headerPriceChangePositive
@@ -168,16 +167,13 @@ export default function SearchDetail({ route, navigation }) {
                                             {"📈" +
                                                 (
                                                     Math.round(
-                                                        info.market_data
-                                                            .price_change_percentage_24h *
-                                                            100
+                                                        info.percentChange * 100
                                                     ) / 100
                                                 ).toFixed(2) +
                                                 "%"}
                                         </Text>
                                     )}
-                                    {info.market_data
-                                        .price_change_percentage_24h <= 0 && (
+                                    {info.percentChange <= 0 && (
                                         <Text
                                             style={
                                                 styles.headerPriceChangeNegative
@@ -186,9 +182,7 @@ export default function SearchDetail({ route, navigation }) {
                                             {"📉" +
                                                 (
                                                     Math.round(
-                                                        info.market_data
-                                                            .price_change_percentage_24h *
-                                                            100
+                                                        info.percentChange * 100
                                                     ) / 100
                                                 ).toFixed(2) +
                                                 "%"}
@@ -198,7 +192,7 @@ export default function SearchDetail({ route, navigation }) {
                                 <View style={styles.iconContainer}>
                                     <Image
                                         source={{
-                                            uri: info.image.large,
+                                            uri: info.icon,
                                         }}
                                         style={{ width: 50, height: 50 }}
                                     />
@@ -208,10 +202,8 @@ export default function SearchDetail({ route, navigation }) {
                                 description="Aktueller Preis"
                                 value={
                                     (
-                                        Math.round(
-                                            info.market_data.current_price.eur *
-                                                100
-                                        ) / 100
+                                        Math.round(info.currentPrice * 100) /
+                                        100
                                     ).toFixed(2) + "€"
                                 }
                             />
@@ -219,30 +211,24 @@ export default function SearchDetail({ route, navigation }) {
                                 description="24-Stunden-Hoch"
                                 value={
                                     (
-                                        Math.round(
-                                            info.market_data.high_24h.eur * 100
-                                        ) / 100
+                                        Math.round(info.high_24h * 100) / 100
                                     ).toFixed(2) + "€"
                                 }
                             />
                             <DetailRow
                                 description="Allzeithoch"
                                 value={
-                                    (
-                                        Math.round(
-                                            info.market_data.ath.eur * 100
-                                        ) / 100
-                                    ).toFixed(2) + "€"
+                                    (Math.round(info.ath * 100) / 100).toFixed(
+                                        2
+                                    ) + "€"
                                 }
                             />
                             <DetailRow
                                 description="Allzeittief"
                                 value={
-                                    (
-                                        Math.round(
-                                            info.market_data.atl.eur * 100
-                                        ) / 100
-                                    ).toFixed(2) + "€"
+                                    (Math.round(info.atl * 100) / 100).toFixed(
+                                        2
+                                    ) + "€"
                                 }
                             />
                             <DetailRow
@@ -251,7 +237,7 @@ export default function SearchDetail({ route, navigation }) {
                             />
                             <DetailRow
                                 description="Entstehungsdatum"
-                                value={info.genesis_date}
+                                value={info.ipo}
                             />
                         </ScrollView>
                         <TouchableOpacity
@@ -295,7 +281,19 @@ export default function SearchDetail({ route, navigation }) {
 
         async function getCryptoData() {
             let data = await getCryptoInformation({ coin_id: item.id });
-            setInfo(data);
+            setInfo({
+                currentPrice: data.market_data.current_price.eur,
+                percentChange: data.market_data.price_change_percentage_24h,
+                high_24h: data.market_data.high_24h.eur,
+                ath: data.market_data.ath.eur,
+                atl: data.market_data.atl.eur,
+                icon: data.image.large,
+                desc: data.description.en,
+                ipo: data.genesis_date,
+                symbol: data.symbol,
+                name: data.name,
+                id: data.id,
+            });
         }
 
         if (item.type === "stock") {
