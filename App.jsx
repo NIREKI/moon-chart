@@ -372,11 +372,7 @@ export function HomeScreen({ route, navigation }) {
             let idIndex = shareListData.current
                 .map((item) => item.id)
                 .indexOf(itemToDelete.current.id);
-            let typeIndex = shareListData.current
-                .map((item) => item.type)
-                .indexOf(itemToDelete.current.type);
-            console.log(itemToDelete.current.name + " " + typeIndex);
-            if (idIndex === typeIndex) {
+            if (idIndex) {
                 shareListData.current.splice(idIndex, 1);
                 ToastAndroid.show(
                     itemToDelete.current.name + " gelöscht",
