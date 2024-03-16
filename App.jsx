@@ -12,6 +12,7 @@ import {
     Pressable,
     Touchable,
     Button,
+    Vibration,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -372,7 +373,7 @@ export function HomeScreen({ route, navigation }) {
             let idIndex = shareListData.current
                 .map((item) => item.id)
                 .indexOf(itemToDelete.current.id);
-            if (idIndex) {
+            if (idIndex > -1) {
                 shareListData.current.splice(idIndex, 1);
                 ToastAndroid.show(
                     itemToDelete.current.name + " gelöscht",
