@@ -179,11 +179,12 @@ const styles = StyleSheet.create({
         width: width,
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "flex-start",
     },
     iconContainer: {
         width: 50,
         height: 50,
-        marginRight: 10,
+        marginRight: 15,
     },
     baseData: {
         flexDirection: "row",
@@ -193,7 +194,7 @@ const styles = StyleSheet.create({
     name: {
         fontWeight: "bold",
         fontSize: 24,
-        textAlign: "center",
+        textAlign: "left",
     },
     symbol: {
         fontSize: 18,

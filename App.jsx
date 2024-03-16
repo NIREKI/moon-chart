@@ -64,24 +64,24 @@ export function HomeScreen({ route, navigation }) {
             historyStatus: "loading",
             history: [],
         },
-        // {
-        //     id: "AAPL",
-        //     name: "Apple Inc",
-        //     type: "stock",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-        // {
-        //     id: "MSFT",
-        //     name: "Microsoft Corp",
-        //     type: "stock",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
+        {
+            id: "AAPL",
+            name: "Apple Inc",
+            type: "stock",
+            value: 0,
+            valueStatus: "loading",
+            historyStatus: "loading",
+            history: [],
+        },
+        {
+            id: "MSFT",
+            name: "Microsoft Corp",
+            type: "stock",
+            value: 0,
+            valueStatus: "loading",
+            historyStatus: "loading",
+            history: [],
+        },
     ]);
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
@@ -371,20 +371,26 @@ export function HomeScreen({ route, navigation }) {
                     contentContainerStyle={{ alignItems: "center" }}
                     numColumns={1}
                     data={shareList}
-                    renderItem={(shareObject) => (
-                        <>
-                            {/* <StockCard
-                                share_object={shareObject.item}
-                                getHistory={getHistory}
-                                promiseQueue={queue}
-                            /> */}
-                            <CryptoCard
-                                cryptoObject={shareObject.item}
-                                getHistory={getHistory}
-                                promiseQueue={queue}
-                            />
-                        </>
-                    )}
+                    renderItem={(item) => {
+                        // Differentiate between stock and crypto and render the item accordingly
+                        if (item.item.type === "stock") {
+                            return (
+                                <StockCard
+                                    stockObject={item.item}
+                                    getHistory={getHistory}
+                                    promiseQueue={queue}
+                                />
+                            );
+                        } else if (item.item.type === "crypto") {
+                            return (
+                                <CryptoCard
+                                    cryptoObject={item.item}
+                                    getHistory={getHistory}
+                                    promiseQueue={queue}
+                                />
+                            );
+                        }
+                    }}
                     keyExtractor={(shareObject) => shareObject.id}
                 />
             </View>

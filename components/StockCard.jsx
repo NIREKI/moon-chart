@@ -1,134 +1,266 @@
-import { useEffect, useState } from "react";
 import {
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
     View,
+    Text,
+    StyleSheet,
+    Image,
     Dimensions,
+    TouchableOpacity,
 } from "react-native";
-import Colors from "../Colors.jsx";
-import { AntDesign } from "@expo/vector-icons";
-import { YAxis, LineChart, Grid, XAxis } from "react-native-svg-charts";
-import { PacmanIndicator, PulseIndicator } from "react-native-indicators";
-import Graph from "./Graph.jsx";
+import { useEffect, useState } from "react";
+import Colors from "../Colors";
+import PercentChange from "./PercentChange";
+import { MaterialIcons } from "@expo/vector-icons";
+import Graph from "./Graph";
+import { SvgUri } from "react-native-svg";
 
-var width = Dimensions.get("window").width;
-
-export default function StockCard({ share_object, getHistory, promiseQueue }) {
+const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
+export default function StockCard({ stockObject, getHistory, promiseQueue }) {
     const [expanded, setExpanded] = useState(false);
-    const [status, setStatus] = useState("");
-
+    const [valueStatus, setValueStatus] = useState("loading");
+    const [infoStatus, setInfoStatus] = useState("loading");
+    const [historyStatus, setHistoryStatus] = useState("loading");
     const toggleExpanded = () => {
         // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
-        if (share_object.historyStatus === "loading") {
+        if (stockObject.historyStatus === "loading") {
             promiseQueue.add(function () {
                 return getHistory({
-                    id: share_object.id,
-                    type: share_object.type,
+                    id: stockObject.id,
+                    type: stockObject.type,
                 });
             });
         }
         setExpanded(!expanded);
     };
+
     useEffect(() => {
-        // TODO: Rewrite this. Function isn't neccesary anymore.
-        if (share_object.valueStatus === "loading") {
-            setStatus("loading");
-        } else if (share_object.valueStatus === "fetched") {
-            setStatus("fetched");
+        if (stockObject.valueStatus === "loading") {
+            setValueStatus("loading");
+        } else if (stockObject.valueStatus === "fetched") {
+            setValueStatus("fetched");
         }
-    }, [share_object]);
+
+        if (stockObject.infoStatus === "loading") {
+            setInfoStatus("loading");
+        } else if (stockObject.infoStatus === "fetched") {
+            setInfoStatus("fetched");
+        }
+        if (stockObject.historyStatus === "loading") {
+            setHistoryStatus("loading");
+        } else if (stockObject.historyStatus === "fetched") {
+            setHistoryStatus("fetched");
+        }
+    }, [stockObject]);
+
     return (
-        <>
-            <View style={styles.outline}>
-                <View style={styles.view}>
-                    {/*In einer Card brauchen wir mehrere Texte. Einmal den Namen der Aktie, den aktuellen Aktienwert und ein button zum expanden der Karte.*/}
-                    <Text style={styles.header}>{share_object.name}</Text>
-                    <View style={styles.itemsRight}>
-                        {!share_object && (
-                            <Text style={styles.value}>Not available.</Text>
-                        )}
-                        {share_object && status === "loading" && (
-                            <PulseIndicator
-                                color={Colors.FROST_WHITE}
-                                size={30}
-                                style={styles.value}
-                            />
-                        )}
-                        {/*der loading param ist notwendig, weil sonst das Object nicht nach dem useEffect rerendered wird*/}
-                        {share_object && status === "fetched" && (
-                            <Text style={styles.value}>
-                                {share_object.value + "€"}
+        <View style={styles.outsideContainer}>
+            {valueStatus === "loading" && (
+                <View style={styles.baseData}>
+                    {/* placeholder for keeping a consistent design */}
+                    <View style={styles.iconContainer} />
+                    <Text style={styles.name}>{stockObject.name}</Text>
+                </View>
+            )}
+            {valueStatus === "fetched" && infoStatus === "fetched" && (
+                <View style={styles.baseContainer}>
+                    <View style={styles.baseData}>
+                        <SvgUri
+                            uri={stockObject.info.icon}
+                            style={styles.iconContainer}
+                        />
+                        <View>
+                            <Text style={styles.name}>{stockObject.name}</Text>
+                            <Text style={styles.symbol}>
+                                {stockObject.id.toUpperCase()}
                             </Text>
-                        )}
-                        <TouchableOpacity onPress={toggleExpanded}>
-                            <AntDesign
-                                name="plussquareo"
-                                size={24}
-                                color="orange"
-                                style={{ alignSelf: "center" }}
+                        </View>
+                    </View>
+                    <View style={styles.rightContainer}>
+                        <View>
+                            <Text style={styles.value}>
+                                {stockObject.value + "€"}
+                            </Text>
+                            <PercentChange
+                                object={stockObject}
+                                styles={{
+                                    percentChange: styles.percentChange,
+                                    percentChangePositive:
+                                        styles.percentChangePositive,
+                                    percentChangeNegative:
+                                        styles.percentChangeNegative,
+                                }}
                             />
-                        </TouchableOpacity>
+                        </View>
+                        <View>
+                            <TouchableOpacity
+                                style={styles.expandButton}
+                                onPress={toggleExpanded}
+                            >
+                                {expanded && (
+                                    <MaterialIcons
+                                        name="expand-less"
+                                        size={30}
+                                        color={"#fff"}
+                                    />
+                                )}
+                                {!expanded && (
+                                    <MaterialIcons
+                                        name="expand-more"
+                                        size={30}
+                                        color={"#fff"}
+                                    />
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
-                {expanded && share_object.historyStatus === "loading" && (
-                    <View
-                        style={{
-                            flex: 1,
-                            alignContent: "center",
-                            height: 200,
-                        }}
-                    >
-                        <PacmanIndicator
-                            color={Colors.FROST_WHITE}
-                            size={100}
-                        />
+            )}
+            {valueStatus === "fetched" &&
+                infoStatus === "fetched" &&
+                expanded && (
+                    <View style={styles.expandContainer}>
+                        <View style={styles.graphContainer}>
+                            {historyStatus === "fetched" && (
+                                <Graph
+                                    object={stockObject}
+                                    width={styles.graphContainer.width}
+                                    height={styles.graphContainer.height}
+                                />
+                            )}
+                        </View>
+                        <View style={styles.infoWrapContainer}>
+                            <DetailRow
+                                description="24-Stunden-Hoch"
+                                value={
+                                    stockObject.info.high_24h.toFixed(2) + "€"
+                                }
+                            />
+                            <DetailRow
+                                description="Previous-Close"
+                                value={
+                                    stockObject.info.prevClose.toFixed(2) + "€"
+                                }
+                            />
+                            <DetailRow
+                                description="Industire"
+                                value={stockObject.info.industry}
+                            />
+                            <DetailRow
+                                description="Entstehungsdatum"
+                                value={stockObject.info.ipo}
+                            />
+                            <DetailRow
+                                description="Ursprungsland"
+                                value={stockObject.info.country}
+                            />
+                        </View>
                     </View>
                 )}
-                {expanded && share_object.historyStatus === "fetched" && (
-                    <Graph share_object={share_object} />
-                )}
-            </View>
-        </>
+        </View>
+    );
+}
+function DetailRow({ description, value }) {
+    return (
+        <View style={styles.informationContainer}>
+            <Text style={styles.informationDesc}>{description}</Text>
+            <Text style={styles.information}>{value}</Text>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    outline: {
-        borderRadius: 5,
-        backgroundColor: "black",
-        padding: 10,
-        marginBottom: 10,
-        width: (width / 100) * 80,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
-        elevation: 10,
+    outsideContainer: {
+        width: width,
+        borderBottomWidth: 1,
+        borderBottomColor: "#000",
+        marginTop: 3,
+        flexDirection: "column",
     },
-    view: {
+    baseContainer: {
+        width: width,
         flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
     },
-    header: {
-        paddingLeft: 10,
-        paddingBottom: 10,
-        color: Colors.FROST_WHITE,
+    iconContainer: {
+        width: 50,
+        height: 50,
+        marginRight: 10,
+    },
+    baseData: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+        width: (width / 100) * 45,
+    },
+    name: {
         fontWeight: "bold",
-        fontSize: 20,
+        fontSize: 24,
+        textAlign: "left",
+    },
+    symbol: {
+        fontSize: 18,
+        textAlign: "left",
+    },
+    rightContainer: {
+        flexDirection: "row",
+        alignContent: "center",
+        justifyContent: "flex-end",
+        width: (width / 100) * 45,
+    },
+    expandButton: {
+        width: 50,
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 10,
+        marginLeft: 10,
+        backgroundColor: Colors.BRIGHT_BLUE,
+        borderRadius: 10,
     },
     value: {
-        color: Colors.FROST_WHITE,
         fontWeight: "bold",
         fontSize: 20,
-        paddingRight: 10,
     },
-    expandedText: {
+    percentChange: {
+        fontWeight: "bold",
+        fontSize: 18,
+        textAlign: "right",
+    },
+    percentChangePositive: {
+        color: "#86B752",
+    },
+    percentChangeNegative: {
+        color: "#EE473A",
+    },
+    expandContainer: {
+        flexDirection: "column",
+        alignItems: "center",
+        width: width,
+    },
+    graphContainer: {
+        height: 200,
+        width: (width / 100) * 80,
+    },
+    infoWrapContainer: {
+        flexDirection: "column",
+        marginTop: 3,
+    },
+    informationContainer: {
+        justifyContent: "space-between",
+        paddingBottom: 10,
         paddingLeft: 10,
-    },
-    itemsRight: {
-        position: "absolute",
-        right: 0,
         flexDirection: "row",
+    },
+    information: {
+        fontSize: 16,
+        color: "#000",
+        marginRight: 20,
+        textAlign: "right",
+        width: (width / 100) * 50,
+    },
+    informationDesc: {
+        fontSize: 16,
+        color: "#888888",
+        marginLeft: 10,
     },
 });
