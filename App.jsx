@@ -9,6 +9,9 @@ import {
     FlatList,
     ToastAndroid,
     RefreshControl,
+    Pressable,
+    Touchable,
+    Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -28,13 +31,19 @@ import {
     getStockMarketStatus,
 } from "./scripts/stock.js";
 import { useState, useEffect, useRef } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+    NavigationContainer,
+    NavigationContainerRefContext,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
 import Queue from "promise-queue";
 import SearchDetail from "./components/SearchDetail.jsx";
 import CryptoCard from "./components/CryptoCard.jsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ConfirmDialog, Dialog } from "react-native-simple-dialogs";
+import Banner from "./components/Banner.jsx";
+
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
 export const debug = false;
@@ -47,7 +56,9 @@ export function HomeScreen({ route, navigation }) {
     const exchangeRate = useRef({ rate: 0, timestamp: 0 });
     const [shareList, setShareList] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [dialog, setDialog] = useState(false);
     const shareListData = useRef([]);
+    const itemToDelete = useRef({ id: null, type: null, name: null });
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
 
@@ -171,7 +182,10 @@ export function HomeScreen({ route, navigation }) {
                 );
             } else {
                 // Failsafe: set exchangeRate.rate to 0.92 and notify user
-                ToastAndroid("Umrechnungskurs ist nicht live.");
+                ToastAndroid.show(
+                    "Umrechnungskurs ist nicht live.",
+                    ToastAndroid.LONG
+                );
                 exchangeRate.current.rate = 0.92;
             }
         }
@@ -352,6 +366,35 @@ export function HomeScreen({ route, navigation }) {
                 }
             });
     }
+    function deleteItem() {
+        //get index of item that the user wants to delete
+        if (itemToDelete.current.id !== null) {
+            let idIndex = shareListData.current
+                .map((item) => item.id)
+                .indexOf(itemToDelete.current.id);
+            let typeIndex = shareListData.current
+                .map((item) => item.type)
+                .indexOf(itemToDelete.current.type);
+            console.log(itemToDelete.current.name + " " + typeIndex);
+            if (idIndex === typeIndex) {
+                shareListData.current.splice(idIndex, 1);
+                ToastAndroid.show(
+                    itemToDelete.current.name + " gelöscht",
+                    ToastAndroid.LONG
+                );
+            }
+            itemToDelete.current.id = null;
+            itemToDelete.current.name = null;
+            itemToDelete.current.type = null;
+
+            setDialog(false);
+            setShareList(shareListData.current);
+            AsyncStorage.setItem(
+                "shareList",
+                JSON.stringify(shareListData.current)
+            );
+        }
+    }
     useEffect(() => {
         if (route.params) {
             if (route.params.add) {
@@ -404,43 +447,98 @@ export function HomeScreen({ route, navigation }) {
 
     return (
         <>
+            <ConfirmDialog
+                title={itemToDelete.current.name + " löschen"}
+                message={
+                    "Möchtest du " +
+                    itemToDelete.current.name +
+                    " wirklich löschen?"
+                }
+                visible={dialog}
+                onTouchOutside={() => setDialog(false)}
+                positiveButton={{
+                    title: "Ja",
+                    onPress: () => {
+                        deleteItem();
+                    },
+                }}
+                negativeButton={{
+                    title: "Nein",
+                    onPress: () => setDialog(false),
+                }}
+            />
             <Text style={styles.header}>MoonChart</Text>
             <View style={styles.container}>
-                <View style={{ height: height * 0.8, width: width }}>
-                    <FlatList
-                        style={{ flex: 1, width: width }}
-                        contentContainerStyle={{ alignItems: "center" }}
-                        numColumns={1}
-                        data={shareList}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refreshing}
-                                onRefresh={() => setRefreshing(true)}
-                            />
-                        }
-                        renderItem={(item) => {
-                            // Differentiate between stock and crypto and render the item accordingly
-                            if (item.item.type === "stock") {
-                                return (
-                                    <StockCard
-                                        stockObject={item.item}
-                                        getHistory={getHistory}
-                                        promiseQueue={queue}
-                                    />
-                                );
-                            } else if (item.item.type === "crypto") {
-                                return (
-                                    <CryptoCard
-                                        cryptoObject={item.item}
-                                        getHistory={getHistory}
-                                        promiseQueue={queue}
-                                    />
-                                );
-                            }
-                        }}
-                        keyExtractor={(shareObject) => shareObject.id}
+                {shareListData.current.length === 0 && (
+                    <Banner
+                        header={`Willkommen!`}
+                        content={`### Du hast noch keine Aktie oder Kryptowährung hinzugefügt. \n\nNutze den **"Suchen"**-Button unten rechts, und füge deinen ersten Eintrag hinzug!`}
+                        color="#ccdeff80"
                     />
-                </View>
+                )}
+                {shareListData.current.length > 0 && (
+                    <View style={{ height: height * 0.8, width: width }}>
+                        <FlatList
+                            style={{ flex: 1, width: width }}
+                            contentContainerStyle={{ alignItems: "center" }}
+                            numColumns={1}
+                            data={shareList}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={refreshing}
+                                    onRefresh={() => setRefreshing(true)}
+                                />
+                            }
+                            renderItem={(item) => {
+                                // Differentiate between stock and crypto and render the item accordingly
+                                if (item.item.type === "stock") {
+                                    return (
+                                        <TouchableOpacity
+                                            onLongPress={() => {
+                                                itemToDelete.current.id =
+                                                    item.item.id;
+                                                itemToDelete.current.type =
+                                                    item.item.type;
+                                                itemToDelete.current.name =
+                                                    item.item.name;
+                                                setDialog(true);
+                                            }}
+                                            activeOpacity={0.7}
+                                        >
+                                            <StockCard
+                                                stockObject={item.item}
+                                                getHistory={getHistory}
+                                                promiseQueue={queue}
+                                            />
+                                        </TouchableOpacity>
+                                    );
+                                } else if (item.item.type === "crypto") {
+                                    return (
+                                        <TouchableOpacity
+                                            onLongPress={() => {
+                                                itemToDelete.current.id =
+                                                    item.item.id;
+                                                itemToDelete.current.type =
+                                                    item.item.type;
+                                                itemToDelete.current.name =
+                                                    item.item.name;
+                                                setDialog(true);
+                                            }}
+                                            activeOpacity={0.7}
+                                        >
+                                            <CryptoCard
+                                                cryptoObject={item.item}
+                                                getHistory={getHistory}
+                                                promiseQueue={queue}
+                                            />
+                                        </TouchableOpacity>
+                                    );
+                                }
+                            }}
+                            keyExtractor={(shareObject) => shareObject.id}
+                        />
+                    </View>
+                )}
                 {/* Floating Search button */}
                 <TouchableOpacity
                     style={styles.floatingSearchButton}
