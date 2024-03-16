@@ -53,6 +53,10 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
         } else if (stockObject.historyStatus === "fetched") {
             setHistoryStatus("fetched");
         }
+        // fix for pull to refresh
+        if (expanded && stockObject.historyStatus === "loading") {
+            toggleExpanded();
+        }
     }, [stockObject]);
 
     return (
@@ -214,6 +218,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         marginRight: 10,
+        marginLeft: 5,
     },
     baseData: {
         flexDirection: "row",

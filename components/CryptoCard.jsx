@@ -52,6 +52,10 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
         } else if (cryptoObject.historyStatus === "fetched") {
             setHistoryStatus("fetched");
         }
+        // fix for pull to refresh
+        if (expanded && cryptoObject.historyStatus === "loading") {
+            toggleExpanded();
+        }
     }, [cryptoObject]);
 
     return (
@@ -206,6 +210,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         marginRight: 10,
+        marginLeft: 5,
     },
     baseData: {
         flexDirection: "row",

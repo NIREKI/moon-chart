@@ -8,6 +8,7 @@ import {
     View,
     FlatList,
     ToastAndroid,
+    RefreshControl,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -33,7 +34,7 @@ import Search from "./components/Search.jsx";
 import Queue from "promise-queue";
 import SearchDetail from "./components/SearchDetail.jsx";
 import CryptoCard from "./components/CryptoCard.jsx";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
 export const debug = false;
@@ -45,44 +46,8 @@ var height = Dimensions.get("window").height;
 export function HomeScreen({ route, navigation }) {
     const exchangeRate = useRef({ rate: 0, timestamp: 0 });
     const [shareList, setShareList] = useState([]);
-    const shareListData = useRef([
-        // {
-        //     id: "bitcoin",
-        //     name: "Bitcoin",
-        //     type: "crypto",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-        {
-            id: "ethereum",
-            name: "Ethereum",
-            type: "crypto",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-        {
-            id: "AAPL",
-            name: "Apple Inc",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-        {
-            id: "MSFT",
-            name: "Microsoft Corp",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-    ]);
+    const [refreshing, setRefreshing] = useState(false);
+    const shareListData = useRef([]);
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
 
@@ -154,7 +119,29 @@ export function HomeScreen({ route, navigation }) {
     }
     async function getExchangeRate() {
         // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
-        if (exchangeRate.current.timestamp === 0) {
+        try {
+            let data = parseFloat(await AsyncStorage.getItem("exchangeRate"));
+            const timestamp = parseInt(
+                await AsyncStorage.getItem("exchangeRateTimestamp")
+            );
+            // if no values are fouund, throw an error to fetch live data!
+            if (isNaN(data) || isNaN(timestamp)) {
+                throw new Error("Not found!");
+            }
+            //check if timestamp is older than 24h. If it is, gather new data.
+            if (Date.now() - timestamp > 1000 * 60 * 60 * 24) {
+                getLiveData();
+            } else {
+                exchangeRate.current.rate = data;
+                exchangeRate.current.timestamp = timestamp;
+                return;
+            }
+        } catch (e) {
+            //local data was not found:
+            getLiveData();
+        }
+
+        async function getLiveData() {
             let key = process.env.EXPO_PUBLIC_FREECURRENCY_API_TOKEN;
             const res = await fetch(
                 "https://api.freecurrencyapi.com/v1/latest?currencies=EUR&apikey=" +
@@ -173,19 +160,24 @@ export function HomeScreen({ route, navigation }) {
                 exchangeRate.current.rate = jsonData.data.EUR;
                 // set exchangeRate.timestamp to the current time
                 exchangeRate.current.timestamp = Date.now();
+                //saving timestamp and rate locally to reduce api calls
+                await AsyncStorage.setItem(
+                    "exchangeRate",
+                    exchangeRate.current.rate.toString()
+                );
+                await AsyncStorage.setItem(
+                    "exchangeRateTimestamp",
+                    exchangeRate.current.timestamp.toString()
+                );
             } else {
-                // Failsafe: set exchangeRate.rate to 0.92
-                // TODO: Show banner for error at fetch to let user know that exchange rate is set to failsafe.
+                // Failsafe: set exchangeRate.rate to 0.92 and notify user
+                ToastAndroid("Umrechnungskurs ist nicht live.");
                 exchangeRate.current.rate = 0.92;
             }
-        } else {
-            return;
         }
     }
 
     async function getHistory({ id, type }) {
-        // make the code pause for 0.1 seconds
-        await new Promise((resolve) => setTimeout(resolve, 100));
         if (type == "crypto") {
             let data = await getCryptoHistory({ coin_id: id });
             shareListData.current = shareListData.current.map((stock) => {
@@ -200,6 +192,10 @@ export function HomeScreen({ route, navigation }) {
                 }
             });
             setShareList(shareListData.current);
+            AsyncStorage.setItem(
+                "shareList",
+                JSON.stringify(shareListData.current)
+            );
         } else if (type == "stock") {
             // Be sure that the exchange rate is set
             await getExchangeRate();
@@ -219,9 +215,142 @@ export function HomeScreen({ route, navigation }) {
                 }
             });
             setShareList(shareListData.current);
+            AsyncStorage.setItem(
+                "shareList",
+                JSON.stringify(shareListData.current)
+            );
         } else {
             console.log("not found");
         }
+    }
+    /**
+     * Fetches the value of each stock and crypto in the shareList array
+     *
+     * Doesn't fetch the history automatically to save data and api requests on polygon
+     */
+    async function getValueData() {
+        // First be sure that a correct exchange rate is already set.
+        await getExchangeRate();
+        await AsyncStorage.getItem("shareList")
+            .then(
+                (res) =>
+                    (shareListData.current = JSON.parse(res).map((item) => {
+                        return {
+                            ...item,
+                            valueStatus: "loading",
+                            infoStatus: "loading",
+                            historyStatus: "loading",
+                        };
+                    }))
+            )
+            .then(async () => {
+                if (shareListData.current) {
+                    let id;
+                    for (let i = 0; i < shareListData.current.length; i++) {
+                        id = shareListData.current[i].id;
+                        shareListData.current[i] = {
+                            ...shareListData.current[i],
+                            valueStatus: "loading",
+                            infoStatus: "loading",
+                        };
+                        setShareList(shareListData.current);
+                        //Crypto price is already in eur
+                        if (shareListData.current[i].type === "crypto") {
+                            let data = await getCryptoInformation({
+                                coin_id: id,
+                            });
+                            let info = {
+                                currentPrice:
+                                    data.market_data.current_price.eur,
+                                percentChange:
+                                    data.market_data
+                                        .price_change_percentage_24h,
+                                high_24h: data.market_data.high_24h.eur,
+                                ath: data.market_data.ath.eur,
+                                atl: data.market_data.atl.eur,
+                                icon: data.image.large,
+                                desc: data.description.en,
+                                ipo: data.genesis_date,
+                                symbol: data.symbol,
+                                name: data.name,
+                            };
+                            shareListData.current = shareListData.current.map(
+                                (stock) => {
+                                    if (stock.id === id) {
+                                        return {
+                                            ...stock,
+                                            value: (
+                                                Math.round(
+                                                    info.currentPrice * 100
+                                                ) / 100
+                                            ).toFixed(2),
+                                            valueStatus: "fetched",
+                                            infoStatus: "fetched",
+                                            info: info,
+                                        };
+                                    } else {
+                                        return stock;
+                                    }
+                                }
+                            );
+                        }
+                        // stock price has to be converted from usd to eur
+                        else if (shareListData.current[i].type === "stock") {
+                            let info;
+                            let data = await getCurrentStockPrice({
+                                symbol: shareListData.current[i].id,
+                            });
+                            let infoData = await getStockCompanyProfile({
+                                symbol: shareListData.current[i].id,
+                            });
+
+                            info = {
+                                industry: infoData.finnhubIndustry,
+                                ipo: infoData.ipo,
+                                icon: infoData.logo,
+                                name: infoData.name,
+                                ticker: infoData.ticker,
+                                country: infoData.country,
+                                website: infoData.weburl,
+                            };
+                            shareListData.current = shareListData.current.map(
+                                (stock) => {
+                                    if (stock.id === id) {
+                                        return {
+                                            ...stock,
+                                            value: (
+                                                Math.round(
+                                                    data.c *
+                                                        exchangeRate.current
+                                                            .rate *
+                                                        100
+                                                ) / 100
+                                            ).toFixed(2),
+                                            valueStatus: "fetched",
+                                            infoStatus: "fetched",
+                                            info: {
+                                                ...info,
+                                                percentChange: data.dp,
+                                                high_24h: data.h,
+                                                prevClose: data.pc,
+                                                currentPrice:
+                                                    data.c *
+                                                    (
+                                                        <exchangeRate className="current rate"></exchangeRate>
+                                                    ),
+                                                data,
+                                            },
+                                        };
+                                    } else {
+                                        return stock;
+                                    }
+                                }
+                            );
+                        }
+                        setShareList(shareListData.current);
+                    }
+                }
+            });
     }
     useEffect(() => {
         if (route.params) {
@@ -231,116 +360,22 @@ export function HomeScreen({ route, navigation }) {
                     itemName: route.params.add.name,
                     itemType: route.params.add.type,
                     itemInfo: route.params.add.fullInfo,
+                }).then(() => {
+                    AsyncStorage.setItem(
+                        "shareList",
+                        JSON.stringify(shareListData.current)
+                    );
                 });
             }
         }
     }, [route]);
+    /** Gets executed when the pull to refresh was activated. */
     useEffect(() => {
-        /**
-         * Fetches the value of each stock and crypto in the shareList array
-         *
-         * Doesn't fetch the history automatically to save data and api requests on polygon
-         */
-        async function getValueData() {
-            // First be sure that a correct exchange rate is already set.
-            await getExchangeRate();
-            if (shareListData.current) {
-                for (let i = 0; i < shareListData.current.length; i++) {
-                    let id = shareListData.current[i].id;
-                    //Crypto price is already in eur
-                    if (shareListData.current[i].type === "crypto") {
-                        let data = await getCryptoInformation({
-                            coin_id: id,
-                        });
-                        let info = {
-                            currentPrice: data.market_data.current_price.eur,
-                            percentChange:
-                                data.market_data.price_change_percentage_24h,
-                            high_24h: data.market_data.high_24h.eur,
-                            ath: data.market_data.ath.eur,
-                            atl: data.market_data.atl.eur,
-                            icon: data.image.large,
-                            desc: data.description.en,
-                            ipo: data.genesis_date,
-                            symbol: data.symbol,
-                            name: data.name,
-                        };
-                        shareListData.current = shareListData.current.map(
-                            (stock) => {
-                                if (stock.id === id) {
-                                    return {
-                                        ...stock,
-                                        value: (
-                                            Math.round(
-                                                info.currentPrice * 100
-                                            ) / 100
-                                        ).toFixed(2),
-                                        valueStatus: "fetched",
-                                        infoStatus: "fetched",
-                                        info: info,
-                                    };
-                                } else {
-                                    return stock;
-                                }
-                            }
-                        );
-                    }
-                    // stock price has to be converted from usd to eur
-                    else if (shareListData.current[i].type === "stock") {
-                        let info;
-                        let data = await getCurrentStockPrice({
-                            symbol: shareListData.current[i].id,
-                        });
-                        let infoData = await getStockCompanyProfile({
-                            symbol: shareListData.current[i].id,
-                        });
-
-                        info = {
-                            industry: infoData.finnhubIndustry,
-                            ipo: infoData.ipo,
-                            icon: infoData.logo,
-                            name: infoData.name,
-                            ticker: infoData.ticker,
-                            country: infoData.country,
-                            website: infoData.weburl,
-                        };
-                        shareListData.current = shareListData.current.map(
-                            (stock) => {
-                                if (stock.id === id) {
-                                    return {
-                                        ...stock,
-                                        value: (
-                                            Math.round(
-                                                data.c *
-                                                    exchangeRate.current.rate *
-                                                    100
-                                            ) / 100
-                                        ).toFixed(2),
-                                        valueStatus: "fetched",
-                                        infoStatus: "fetched",
-                                        info: {
-                                            ...info,
-                                            percentChange: data.dp,
-                                            high_24h: data.h,
-                                            prevClose: data.pc,
-                                            currentPrice:
-                                                data.c *
-                                                (
-                                                    <exchangeRate className="current rate"></exchangeRate>
-                                                ),
-                                            data,
-                                        },
-                                    };
-                                } else {
-                                    return stock;
-                                }
-                            }
-                        );
-                    }
-                    setShareList(shareListData.current);
-                }
-            }
+        if (refreshing) {
+            getValueData().then(() => setRefreshing(false));
         }
+    }, [refreshing]);
+    useEffect(() => {
         if (debug) {
             getExchangeRate();
             shareListData.current = shareListData.current.map((item) => {
@@ -358,8 +393,12 @@ export function HomeScreen({ route, navigation }) {
             });
             setShareList(shareListData.current);
         } else {
-            setShareList(shareListData.current);
-            getValueData();
+            getValueData().then(() => {
+                AsyncStorage.setItem(
+                    "shareList",
+                    JSON.stringify(shareListData.current)
+                );
+            });
         }
     }, []);
 
@@ -373,6 +412,12 @@ export function HomeScreen({ route, navigation }) {
                         contentContainerStyle={{ alignItems: "center" }}
                         numColumns={1}
                         data={shareList}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={() => setRefreshing(true)}
+                            />
+                        }
                         renderItem={(item) => {
                             // Differentiate between stock and crypto and render the item accordingly
                             if (item.item.type === "stock") {
