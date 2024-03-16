@@ -9,8 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { getCryptoInformation } from "../scripts/crypto.js";
 import { SvgUri } from "react-native-svg";
-import { BallIndicator } from "react-native-indicators";
-
+import AnimatedLoader from "react-native-animated-loader";
 /**
  * This Comopnent shows a detail page for the selected stock or crypto item in the search list.
  * It then checks if the item is a stock or crypto and then fetches mission data accordingly.
@@ -73,7 +72,7 @@ export default function SearchDetail({ route, navigation }) {
                                     <SvgUri
                                         width={70}
                                         height={70}
-                                        uri={info.logo}
+                                        uri={info.icon}
                                     />
                                 </View>
                             </View>
@@ -134,6 +133,7 @@ export default function SearchDetail({ route, navigation }) {
                                         id: info.ticker,
                                         name: info.name,
                                         type: "stock",
+                                        fullInfo: info,
                                     },
                                 });
                             }}
@@ -158,8 +158,7 @@ export default function SearchDetail({ route, navigation }) {
                                     <Text style={styles.title}>
                                         {info.name}
                                     </Text>
-                                    {info.market_data
-                                        .price_change_percentage_24h > 0 && (
+                                    {info.percentChange > 0 && (
                                         <Text
                                             style={
                                                 styles.headerPriceChangePositive
@@ -168,16 +167,13 @@ export default function SearchDetail({ route, navigation }) {
                                             {"📈" +
                                                 (
                                                     Math.round(
-                                                        info.market_data
-                                                            .price_change_percentage_24h *
-                                                            100
+                                                        info.percentChange * 100
                                                     ) / 100
                                                 ).toFixed(2) +
                                                 "%"}
                                         </Text>
                                     )}
-                                    {info.market_data
-                                        .price_change_percentage_24h <= 0 && (
+                                    {info.percentChange <= 0 && (
                                         <Text
                                             style={
                                                 styles.headerPriceChangeNegative
@@ -186,9 +182,7 @@ export default function SearchDetail({ route, navigation }) {
                                             {"📉" +
                                                 (
                                                     Math.round(
-                                                        info.market_data
-                                                            .price_change_percentage_24h *
-                                                            100
+                                                        info.percentChange * 100
                                                     ) / 100
                                                 ).toFixed(2) +
                                                 "%"}
@@ -198,7 +192,7 @@ export default function SearchDetail({ route, navigation }) {
                                 <View style={styles.iconContainer}>
                                     <Image
                                         source={{
-                                            uri: info.image.large,
+                                            uri: info.icon,
                                         }}
                                         style={{ width: 50, height: 50 }}
                                     />
@@ -208,10 +202,8 @@ export default function SearchDetail({ route, navigation }) {
                                 description="Aktueller Preis"
                                 value={
                                     (
-                                        Math.round(
-                                            info.market_data.current_price.eur *
-                                                100
-                                        ) / 100
+                                        Math.round(info.currentPrice * 100) /
+                                        100
                                     ).toFixed(2) + "€"
                                 }
                             />
@@ -219,30 +211,24 @@ export default function SearchDetail({ route, navigation }) {
                                 description="24-Stunden-Hoch"
                                 value={
                                     (
-                                        Math.round(
-                                            info.market_data.high_24h.eur * 100
-                                        ) / 100
+                                        Math.round(info.high_24h * 100) / 100
                                     ).toFixed(2) + "€"
                                 }
                             />
                             <DetailRow
                                 description="Allzeithoch"
                                 value={
-                                    (
-                                        Math.round(
-                                            info.market_data.ath.eur * 100
-                                        ) / 100
-                                    ).toFixed(2) + "€"
+                                    (Math.round(info.ath * 100) / 100).toFixed(
+                                        2
+                                    ) + "€"
                                 }
                             />
                             <DetailRow
                                 description="Allzeittief"
                                 value={
-                                    (
-                                        Math.round(
-                                            info.market_data.atl.eur * 100
-                                        ) / 100
-                                    ).toFixed(2) + "€"
+                                    (Math.round(info.atl * 100) / 100).toFixed(
+                                        2
+                                    ) + "€"
                                 }
                             />
                             <DetailRow
@@ -251,7 +237,7 @@ export default function SearchDetail({ route, navigation }) {
                             />
                             <DetailRow
                                 description="Entstehungsdatum"
-                                value={info.genesis_date}
+                                value={info.ipo}
                             />
                         </ScrollView>
                         <TouchableOpacity
@@ -261,6 +247,7 @@ export default function SearchDetail({ route, navigation }) {
                                         id: info.id,
                                         name: info.name,
                                         type: "crypto",
+                                        fullInfo: info,
                                     },
                                 });
                             }}
@@ -285,7 +272,7 @@ export default function SearchDetail({ route, navigation }) {
                 prevClose: priceData.pc,
                 industry: data.finnhubIndustry,
                 ipo: data.ipo,
-                logo: data.logo,
+                icon: data.logo,
                 name: data.name,
                 ticker: data.ticker,
                 country: data.country,
@@ -295,7 +282,19 @@ export default function SearchDetail({ route, navigation }) {
 
         async function getCryptoData() {
             let data = await getCryptoInformation({ coin_id: item.id });
-            setInfo(data);
+            setInfo({
+                currentPrice: data.market_data.current_price.eur,
+                percentChange: data.market_data.price_change_percentage_24h,
+                high_24h: data.market_data.high_24h.eur,
+                ath: data.market_data.ath.eur,
+                atl: data.market_data.atl.eur,
+                icon: data.image.large,
+                desc: data.description.en,
+                ipo: data.genesis_date,
+                symbol: data.symbol,
+                name: data.name,
+                id: data.id,
+            });
         }
 
         if (item.type === "stock") {
@@ -336,9 +335,12 @@ function DetailRow({ description, value }) {
 function LoadingScreen() {
     return (
         <View style={[styles.container, { alignItems: "center" }]}>
-            <BallIndicator
-                color={Colors.BRIGHT_BLUE}
-                style={{ width: 150, height: 150 }}
+            <AnimatedLoader
+                visible={true}
+                source={require("../assets/animations/infinity.json")}
+                speed={0.5}
+                overlayColor="rgba(255,255,255,0.5)"
+                animationStyle={{ width: 400, height: 400 }}
             />
         </View>
     );

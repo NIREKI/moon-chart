@@ -6,7 +6,7 @@
  */
 //if true wir der fetch status in der console gelogged
 const debugAPI = false;
-export default async function getCurrentCryptoPrice({coin_id}){
+export async function getCurrentCryptoPrice({coin_id}){
     const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=" + coin_id + "&vs_currencies=eur",{
          method: "GET",
          mode: "cors",

@@ -14,7 +14,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 import { FontAwesome5 } from "@expo/vector-icons";
-import getCurrentCryptoPrice, { getCryptoHistory } from "./scripts/crypto.js";
+import {
+    getCurrentCryptoPrice,
+    getCryptoHistory,
+    getCryptoInformation,
+} from "./scripts/crypto.js";
 import {
     getCurrentStockPrice,
     getStockCompanyProfile,
@@ -28,6 +32,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
 import Queue from "promise-queue";
 import SearchDetail from "./components/SearchDetail.jsx";
+import CryptoCard from "./components/CryptoCard.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
@@ -50,15 +55,15 @@ export function HomeScreen({ route, navigation }) {
         //     historyStatus: "loading",
         //     history: [],
         // },
-        // {
-        //     id: "ethereum",
-        //     name: "Ethereum",
-        //     type: "crypto",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
+        {
+            id: "ethereum",
+            name: "Ethereum",
+            type: "crypto",
+            value: 0,
+            valueStatus: "loading",
+            historyStatus: "loading",
+            history: [],
+        },
         {
             id: "AAPL",
             name: "Apple Inc",
@@ -78,7 +83,7 @@ export function HomeScreen({ route, navigation }) {
             history: [],
         },
     ]);
-    async function addToHomescreen({ itemId, itemName, itemType }) {
+    async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
 
         shareListData.current.forEach((item) => {
@@ -102,6 +107,8 @@ export function HomeScreen({ route, navigation }) {
             valueStatus: "loading",
             historyStatus: "loading",
             history: [],
+            infoStatus: "fetched",
+            info: itemInfo,
         });
         setShareList(shareListData.current);
         ToastAndroid.show(itemName + " wurde hinzugefügt.", ToastAndroid.LONG);
@@ -129,15 +136,13 @@ export function HomeScreen({ route, navigation }) {
                     }
                 });
             } else if (type === "crypto") {
-                let data = await getCryptoHistory({ coin_id: id });
                 shareListData.current = shareListData.current.map((crypto) => {
                     if (crypto.id === id) {
                         return {
                             ...crypto,
                             value: (
-                                Math.round(data.slice(-1)[0].price * 100) / 100
+                                Math.round(itemInfo.currentPrice * 100) / 100
                             ).toFixed(2),
-                            history: data,
                             valueStatus: "fetched",
                         };
                     } else {
@@ -225,6 +230,7 @@ export function HomeScreen({ route, navigation }) {
                     itemId: route.params.add.id,
                     itemName: route.params.add.name,
                     itemType: route.params.add.type,
+                    itemInfo: route.params.add.fullInfo,
                 });
             }
         }
@@ -243,7 +249,22 @@ export function HomeScreen({ route, navigation }) {
                     let id = shareListData.current[i].id;
                     //Crypto price is already in eur
                     if (shareListData.current[i].type === "crypto") {
-                        let data = await getCryptoHistory({ coin_id: id });
+                        let data = await getCryptoInformation({
+                            coin_id: id,
+                        });
+                        let info = {
+                            currentPrice: data.market_data.current_price.eur,
+                            percentChange:
+                                data.market_data.price_change_percentage_24h,
+                            high_24h: data.market_data.high_24h.eur,
+                            ath: data.market_data.ath.eur,
+                            atl: data.market_data.atl.eur,
+                            icon: data.image.large,
+                            desc: data.description.en,
+                            ipo: data.genesis_date,
+                            symbol: data.symbol,
+                            name: data.name,
+                        };
                         shareListData.current = shareListData.current.map(
                             (stock) => {
                                 if (stock.id === id) {
@@ -251,11 +272,12 @@ export function HomeScreen({ route, navigation }) {
                                         ...stock,
                                         value: (
                                             Math.round(
-                                                data.slice(-1)[0].price * 100
+                                                info.currentPrice * 100
                                             ) / 100
                                         ).toFixed(2),
-                                        history: data,
                                         valueStatus: "fetched",
+                                        infoStatus: "fetched",
+                                        info: info,
                                     };
                                 } else {
                                     return stock;
@@ -265,9 +287,23 @@ export function HomeScreen({ route, navigation }) {
                     }
                     // stock price has to be converted from usd to eur
                     else if (shareListData.current[i].type === "stock") {
+                        let info;
                         let data = await getCurrentStockPrice({
                             symbol: shareListData.current[i].id,
                         });
+                        let infoData = await getStockCompanyProfile({
+                            symbol: shareListData.current[i].id,
+                        });
+
+                        info = {
+                            industry: infoData.finnhubIndustry,
+                            ipo: infoData.ipo,
+                            icon: infoData.logo,
+                            name: infoData.name,
+                            ticker: infoData.ticker,
+                            country: infoData.country,
+                            website: infoData.weburl,
+                        };
                         shareListData.current = shareListData.current.map(
                             (stock) => {
                                 if (stock.id === id) {
@@ -281,6 +317,19 @@ export function HomeScreen({ route, navigation }) {
                                             ) / 100
                                         ).toFixed(2),
                                         valueStatus: "fetched",
+                                        infoStatus: "fetched",
+                                        info: {
+                                            ...info,
+                                            percentChange: data.dp,
+                                            high_24h: data.h,
+                                            prevClose: data.pc,
+                                            currentPrice:
+                                                data.c *
+                                                (
+                                                    <exchangeRate className="current rate"></exchangeRate>
+                                                ),
+                                            data,
+                                        },
                                     };
                                 } else {
                                     return stock;
@@ -298,7 +347,8 @@ export function HomeScreen({ route, navigation }) {
                 return {
                     ...item,
                     value: 10,
-                    valueStatus: "fetched",
+                    valueStatus: "loading",
+                    infoStatus: "loading",
                     history: [
                         { price: 10, timestamp: 0 },
                         { price: 11, timestamp: 10 },
@@ -314,46 +364,61 @@ export function HomeScreen({ route, navigation }) {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <>
             <Text style={styles.header}>MoonChart</Text>
-            <View style={{ height: height * 0.8, width: width }}>
-                <FlatList
-                    style={{ flex: 1, width: width }}
-                    contentContainerStyle={{ alignItems: "center" }}
-                    numColumns={1}
-                    data={shareList}
-                    renderItem={(shareObject) => (
-                        <StockCard
-                            share_object={shareObject.item}
-                            getHistory={getHistory}
-                            promiseQueue={queue}
-                        />
-                    )}
-                    keyExtractor={(shareObject) => shareObject.id}
-                />
-            </View>
-            {/* Floating Search button */}
-            <TouchableOpacity
-                style={styles.floatingSearchButton}
-                onPress={() =>
-                    navigation.navigate("Search", {
-                        exchangeRate: exchangeRate,
-                    })
-                }
-            >
-                <Text
-                    style={{
-                        color: "#fff",
-                        fontWeight: "bold",
-                        paddingRight: 20,
-                        fontSize: 20,
-                    }}
+            <View style={styles.container}>
+                <View style={{ height: height * 0.8, width: width }}>
+                    <FlatList
+                        style={{ flex: 1, width: width }}
+                        contentContainerStyle={{ alignItems: "center" }}
+                        numColumns={1}
+                        data={shareList}
+                        renderItem={(item) => {
+                            // Differentiate between stock and crypto and render the item accordingly
+                            if (item.item.type === "stock") {
+                                return (
+                                    <StockCard
+                                        stockObject={item.item}
+                                        getHistory={getHistory}
+                                        promiseQueue={queue}
+                                    />
+                                );
+                            } else if (item.item.type === "crypto") {
+                                return (
+                                    <CryptoCard
+                                        cryptoObject={item.item}
+                                        getHistory={getHistory}
+                                        promiseQueue={queue}
+                                    />
+                                );
+                            }
+                        }}
+                        keyExtractor={(shareObject) => shareObject.id}
+                    />
+                </View>
+                {/* Floating Search button */}
+                <TouchableOpacity
+                    style={styles.floatingSearchButton}
+                    onPress={() =>
+                        navigation.navigate("Search", {
+                            exchangeRate: exchangeRate,
+                        })
+                    }
                 >
-                    Suchen
-                </Text>
-                <FontAwesome5 name="search" size={20} color="#fff" />
-            </TouchableOpacity>
-        </View>
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontWeight: "bold",
+                            paddingRight: 20,
+                            fontSize: 20,
+                        }}
+                    >
+                        Suchen
+                    </Text>
+                    <FontAwesome5 name="search" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
+        </>
     );
 }
 
@@ -384,16 +449,20 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: "#fff",
         alignItems: "center",
         width: width,
         //justifyContent: "flex-start",
     },
     header: {
-        padding: 40,
+        paddingTop: 50,
+        paddingLeft: 10,
+        paddingBottom: 20,
         fontSize: 30,
         fontWeight: "bold",
-        color: Colors.PURPLE,
+        color: "#000",
+        textAlign: "left",
+        backgroundColor: "#fff",
     },
     floatingSearchButton: {
         flexDirection: "row",

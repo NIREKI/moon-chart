@@ -11,25 +11,24 @@ import Colors from "../Colors";
 import PercentChange from "./PercentChange";
 import { MaterialIcons } from "@expo/vector-icons";
 import Graph from "./Graph";
-import { SvgUri } from "react-native-svg";
 import { CirclesRotationScaleLoader, TextLoader } from "react-native-indicator";
 import { WaveIndicator } from "react-native-indicators";
 import AnimatedLoader from "react-native-animated-loader";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
-export default function StockCard({ stockObject, getHistory, promiseQueue }) {
+export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
     const [expanded, setExpanded] = useState(false);
     const [valueStatus, setValueStatus] = useState("loading");
     const [infoStatus, setInfoStatus] = useState("loading");
     const [historyStatus, setHistoryStatus] = useState("loading");
     const toggleExpanded = () => {
         // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
-        if (stockObject.historyStatus === "loading") {
+        if (cryptoObject.historyStatus === "loading") {
             promiseQueue.add(function () {
                 return getHistory({
-                    id: stockObject.id,
-                    type: stockObject.type,
+                    id: cryptoObject.id,
+                    type: cryptoObject.type,
                 });
             });
         }
@@ -37,23 +36,23 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
     };
 
     useEffect(() => {
-        if (stockObject.valueStatus === "loading") {
+        if (cryptoObject.valueStatus === "loading") {
             setValueStatus("loading");
-        } else if (stockObject.valueStatus === "fetched") {
+        } else if (cryptoObject.valueStatus === "fetched") {
             setValueStatus("fetched");
         }
 
-        if (stockObject.infoStatus === "loading") {
+        if (cryptoObject.infoStatus === "loading") {
             setInfoStatus("loading");
-        } else if (stockObject.infoStatus === "fetched") {
+        } else if (cryptoObject.infoStatus === "fetched") {
             setInfoStatus("fetched");
         }
-        if (stockObject.historyStatus === "loading") {
+        if (cryptoObject.historyStatus === "loading") {
             setHistoryStatus("loading");
-        } else if (stockObject.historyStatus === "fetched") {
+        } else if (cryptoObject.historyStatus === "fetched") {
             setHistoryStatus("fetched");
         }
-    }, [stockObject]);
+    }, [cryptoObject]);
 
     return (
         <View style={styles.outsideContainer}>
@@ -63,7 +62,7 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
                         {/* placeholder for keeping a consistent design */}
                         <View style={styles.iconContainer} />
                         <View>
-                            <Text style={styles.name}>{stockObject.name}</Text>
+                            <Text style={styles.name}>{cryptoObject.name}</Text>
                             <TextLoader
                                 text="LÄDT"
                                 style={styles.symbolLoading}
@@ -80,27 +79,26 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
             {valueStatus === "fetched" && infoStatus === "fetched" && (
                 <View style={styles.baseContainer}>
                     <View style={styles.baseData}>
-                        <View style={styles.iconContainer}>
-                            <SvgUri
-                                uri={stockObject.info.icon}
-                                width={styles.iconContainer.width}
-                                height={styles.iconContainer.height}
-                            />
-                        </View>
+                        <Image
+                            source={{
+                                uri: cryptoObject.info.icon,
+                            }}
+                            style={styles.iconContainer}
+                        />
                         <View>
-                            <Text style={styles.name}>{stockObject.name}</Text>
+                            <Text style={styles.name}>{cryptoObject.name}</Text>
                             <Text style={styles.symbol}>
-                                {stockObject.id.toUpperCase()}
+                                {cryptoObject.info.symbol.toUpperCase()}
                             </Text>
                         </View>
                     </View>
                     <View style={styles.rightContainer}>
                         <View>
                             <Text style={styles.value}>
-                                {stockObject.value + "€"}
+                                {cryptoObject.value + "€"}
                             </Text>
                             <PercentChange
-                                object={stockObject}
+                                object={cryptoObject}
                                 styles={{
                                     percentChange: styles.percentChange,
                                     percentChangePositive:
@@ -150,7 +148,7 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
                             )}
                             {historyStatus === "fetched" && (
                                 <Graph
-                                    object={stockObject}
+                                    object={cryptoObject}
                                     width={styles.graphContainer.width}
                                     height={styles.graphContainer.height}
                                 />
@@ -160,26 +158,20 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
                             <DetailRow
                                 description="24-Stunden-Hoch"
                                 value={
-                                    stockObject.info.high_24h.toFixed(2) + "€"
+                                    cryptoObject.info.high_24h.toFixed(2) + "€"
                                 }
                             />
                             <DetailRow
-                                description="Previous-Close"
-                                value={
-                                    stockObject.info.prevClose.toFixed(2) + "€"
-                                }
+                                description="Allzeithoch"
+                                value={cryptoObject.info.ath.toFixed(2) + "€"}
                             />
                             <DetailRow
-                                description="Industire"
-                                value={stockObject.info.industry}
+                                description="Allzeittief"
+                                value={cryptoObject.info.atl.toFixed(2) + "€"}
                             />
                             <DetailRow
                                 description="Entstehungsdatum"
-                                value={stockObject.info.ipo}
-                            />
-                            <DetailRow
-                                description="Ursprungsland"
-                                value={stockObject.info.country}
+                                value={cryptoObject.info.ipo}
                             />
                         </View>
                     </View>
@@ -217,7 +209,7 @@ const styles = StyleSheet.create({
     },
     baseData: {
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
         width: (width / 100) * 45,
     },
     name: {
@@ -233,16 +225,16 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: "left",
     },
-    waveLoader: {
-        marginRight: 30,
-        justifyContent: "center",
-        alignItems: "center",
-    },
     rightContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "flex-end",
         width: (width / 100) * 45,
+    },
+    waveLoader: {
+        marginRight: 30,
+        justifyContent: "center",
+        alignItems: "center",
     },
     expandButton: {
         width: 50,
