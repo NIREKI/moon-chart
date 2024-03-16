@@ -347,7 +347,8 @@ export function HomeScreen({ route, navigation }) {
                 return {
                     ...item,
                     value: 10,
-                    valueStatus: "fetched",
+                    valueStatus: "loading",
+                    infoStatus: "loading",
                     history: [
                         { price: 10, timestamp: 0 },
                         { price: 11, timestamp: 10 },
@@ -363,59 +364,61 @@ export function HomeScreen({ route, navigation }) {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <>
             <Text style={styles.header}>MoonChart</Text>
-            <View style={{ height: height * 0.8, width: width }}>
-                <FlatList
-                    style={{ flex: 1, width: width }}
-                    contentContainerStyle={{ alignItems: "center" }}
-                    numColumns={1}
-                    data={shareList}
-                    renderItem={(item) => {
-                        // Differentiate between stock and crypto and render the item accordingly
-                        if (item.item.type === "stock") {
-                            return (
-                                <StockCard
-                                    stockObject={item.item}
-                                    getHistory={getHistory}
-                                    promiseQueue={queue}
-                                />
-                            );
-                        } else if (item.item.type === "crypto") {
-                            return (
-                                <CryptoCard
-                                    cryptoObject={item.item}
-                                    getHistory={getHistory}
-                                    promiseQueue={queue}
-                                />
-                            );
-                        }
-                    }}
-                    keyExtractor={(shareObject) => shareObject.id}
-                />
-            </View>
-            {/* Floating Search button */}
-            <TouchableOpacity
-                style={styles.floatingSearchButton}
-                onPress={() =>
-                    navigation.navigate("Search", {
-                        exchangeRate: exchangeRate,
-                    })
-                }
-            >
-                <Text
-                    style={{
-                        color: "#fff",
-                        fontWeight: "bold",
-                        paddingRight: 20,
-                        fontSize: 20,
-                    }}
+            <View style={styles.container}>
+                <View style={{ height: height * 0.8, width: width }}>
+                    <FlatList
+                        style={{ flex: 1, width: width }}
+                        contentContainerStyle={{ alignItems: "center" }}
+                        numColumns={1}
+                        data={shareList}
+                        renderItem={(item) => {
+                            // Differentiate between stock and crypto and render the item accordingly
+                            if (item.item.type === "stock") {
+                                return (
+                                    <StockCard
+                                        stockObject={item.item}
+                                        getHistory={getHistory}
+                                        promiseQueue={queue}
+                                    />
+                                );
+                            } else if (item.item.type === "crypto") {
+                                return (
+                                    <CryptoCard
+                                        cryptoObject={item.item}
+                                        getHistory={getHistory}
+                                        promiseQueue={queue}
+                                    />
+                                );
+                            }
+                        }}
+                        keyExtractor={(shareObject) => shareObject.id}
+                    />
+                </View>
+                {/* Floating Search button */}
+                <TouchableOpacity
+                    style={styles.floatingSearchButton}
+                    onPress={() =>
+                        navigation.navigate("Search", {
+                            exchangeRate: exchangeRate,
+                        })
+                    }
                 >
-                    Suchen
-                </Text>
-                <FontAwesome5 name="search" size={20} color="#fff" />
-            </TouchableOpacity>
-        </View>
+                    <Text
+                        style={{
+                            color: "#fff",
+                            fontWeight: "bold",
+                            paddingRight: 20,
+                            fontSize: 20,
+                        }}
+                    >
+                        Suchen
+                    </Text>
+                    <FontAwesome5 name="search" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
+        </>
     );
 }
 
@@ -446,16 +449,20 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "white",
+        backgroundColor: "#fff",
         alignItems: "center",
         width: width,
         //justifyContent: "flex-start",
     },
     header: {
-        padding: 40,
+        paddingTop: 50,
+        paddingLeft: 10,
+        paddingBottom: 20,
         fontSize: 30,
         fontWeight: "bold",
-        color: Colors.PURPLE,
+        color: "#000",
+        textAlign: "left",
+        backgroundColor: "#fff",
     },
     floatingSearchButton: {
         flexDirection: "row",

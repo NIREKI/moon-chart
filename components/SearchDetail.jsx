@@ -9,8 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { getCryptoInformation } from "../scripts/crypto.js";
 import { SvgUri } from "react-native-svg";
-import { BallIndicator } from "react-native-indicators";
-
+import AnimatedLoader from "react-native-animated-loader";
 /**
  * This Comopnent shows a detail page for the selected stock or crypto item in the search list.
  * It then checks if the item is a stock or crypto and then fetches mission data accordingly.
@@ -336,9 +335,12 @@ function DetailRow({ description, value }) {
 function LoadingScreen() {
     return (
         <View style={[styles.container, { alignItems: "center" }]}>
-            <BallIndicator
-                color={Colors.BRIGHT_BLUE}
-                style={{ width: 150, height: 150 }}
+            <AnimatedLoader
+                visible={true}
+                source={require("../assets/animations/infinity.json")}
+                speed={0.5}
+                overlayColor="rgba(255,255,255,0.5)"
+                animationStyle={{ width: 400, height: 400 }}
             />
         </View>
     );

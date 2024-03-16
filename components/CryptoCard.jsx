@@ -11,6 +11,9 @@ import Colors from "../Colors";
 import PercentChange from "./PercentChange";
 import { MaterialIcons } from "@expo/vector-icons";
 import Graph from "./Graph";
+import { CirclesRotationScaleLoader, TextLoader } from "react-native-indicator";
+import { WaveIndicator } from "react-native-indicators";
+import AnimatedLoader from "react-native-animated-loader";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
@@ -54,10 +57,23 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
     return (
         <View style={styles.outsideContainer}>
             {valueStatus === "loading" && (
-                <View style={styles.baseData}>
-                    {/* placeholder for keeping a consistent design */}
-                    <View style={styles.iconContainer} />
-                    <Text style={styles.name}>{cryptoObject.name}</Text>
+                <View style={styles.baseContainer}>
+                    <View style={styles.baseData}>
+                        {/* placeholder for keeping a consistent design */}
+                        <View style={styles.iconContainer} />
+                        <View>
+                            <Text style={styles.name}>{cryptoObject.name}</Text>
+                            <TextLoader
+                                text="LÄDT"
+                                style={styles.symbolLoading}
+                            />
+                        </View>
+                    </View>
+                    <View style={styles.rightContainer}>
+                        <View style={styles.waveLoader}>
+                            <WaveIndicator color="#000" size={40} />
+                        </View>
+                    </View>
                 </View>
             )}
             {valueStatus === "fetched" && infoStatus === "fetched" && (
@@ -72,11 +88,7 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
                         <View>
                             <Text style={styles.name}>{cryptoObject.name}</Text>
                             <Text style={styles.symbol}>
-                                {/*prettier ignore  */}
-                                {cryptoObject.type === "crypto" &&
-                                    cryptoObject.info.symbol.toUpperCase()}
-                                {cryptoObject.type === "stock" &&
-                                    cryptoObject.id.toUpperCase()}
+                                {cryptoObject.info.symbol.toUpperCase()}
                             </Text>
                         </View>
                     </View>
@@ -125,6 +137,15 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
                 expanded && (
                     <View style={styles.expandContainer}>
                         <View style={styles.graphContainer}>
+                            {historyStatus === "loading" && (
+                                <AnimatedLoader
+                                    visible={true}
+                                    source={require("../assets/animations/infinity.json")}
+                                    speed={0.5}
+                                    overlayColor="rgba(255,255,255,0.5)"
+                                    animationStyle={{ width: 250, height: 250 }}
+                                />
+                            )}
                             {historyStatus === "fetched" && (
                                 <Graph
                                     object={cryptoObject}
@@ -184,7 +205,7 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 50,
         height: 50,
-        marginRight: 15,
+        marginRight: 10,
     },
     baseData: {
         flexDirection: "row",
@@ -200,11 +221,20 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: "left",
     },
+    symbolLoading: {
+        fontSize: 18,
+        textAlign: "left",
+    },
     rightContainer: {
         flexDirection: "row",
-        alignContent: "center",
+        alignItems: "center",
         justifyContent: "flex-end",
         width: (width / 100) * 45,
+    },
+    waveLoader: {
+        marginRight: 30,
+        justifyContent: "center",
+        alignItems: "center",
     },
     expandButton: {
         width: 50,
