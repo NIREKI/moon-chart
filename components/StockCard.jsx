@@ -218,6 +218,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         marginRight: 10,
+        marginLeft: 5,
     },
     baseData: {
         flexDirection: "row",
