@@ -47,44 +47,7 @@ export function HomeScreen({ route, navigation }) {
     const exchangeRate = useRef({ rate: 0, timestamp: 0 });
     const [shareList, setShareList] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
-    const shareListData = useRef([
-        // {
-        //     id: "bitcoin",
-        //     name: "Bitcoin",
-        //     type: "crypto",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-        // {
-        //     id: "ethereum",
-        //     name: "Ethereum",
-        //     type: "crypto",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-        // {
-        //     id: "AAPL",
-        //     name: "Apple Inc",
-        //     type: "stock",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-        // {
-        //     id: "MSFT",
-        //     name: "Microsoft Corp",
-        //     type: "stock",
-        //     value: 0,
-        //     valueStatus: "loading",
-        //     historyStatus: "loading",
-        //     history: [],
-        // },
-    ]);
+    const shareListData = useRef([]);
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
 
@@ -156,7 +119,29 @@ export function HomeScreen({ route, navigation }) {
     }
     async function getExchangeRate() {
         // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
-        if (exchangeRate.current.timestamp === 0) {
+        try {
+            let data = parseFloat(await AsyncStorage.getItem("exchangeRate"));
+            const timestamp = parseInt(
+                await AsyncStorage.getItem("exchangeRateTimestamp")
+            );
+            // if no values are fouund, throw an error to fetch live data!
+            if (isNaN(data) || isNaN(timestamp)) {
+                throw new Error("Not found!");
+            }
+            //check if timestamp is older than 24h. If it is, gather new data.
+            if (Date.now() - timestamp > 1000 * 60 * 60 * 24) {
+                getLiveData();
+            } else {
+                exchangeRate.current.rate = data;
+                exchangeRate.current.timestamp = timestamp;
+                return;
+            }
+        } catch (e) {
+            //local data was not found:
+            getLiveData();
+        }
+
+        async function getLiveData() {
             let key = process.env.EXPO_PUBLIC_FREECURRENCY_API_TOKEN;
             const res = await fetch(
                 "https://api.freecurrencyapi.com/v1/latest?currencies=EUR&apikey=" +
@@ -175,13 +160,20 @@ export function HomeScreen({ route, navigation }) {
                 exchangeRate.current.rate = jsonData.data.EUR;
                 // set exchangeRate.timestamp to the current time
                 exchangeRate.current.timestamp = Date.now();
+                //saving timestamp and rate locally to reduce api calls
+                await AsyncStorage.setItem(
+                    "exchangeRate",
+                    exchangeRate.current.rate.toString()
+                );
+                await AsyncStorage.setItem(
+                    "exchangeRateTimestamp",
+                    exchangeRate.current.timestamp.toString()
+                );
             } else {
-                // Failsafe: set exchangeRate.rate to 0.92
-                // TODO: Show banner for error at fetch to let user know that exchange rate is set to failsafe.
+                // Failsafe: set exchangeRate.rate to 0.92 and notify user
+                ToastAndroid("Umrechnungskurs ist nicht live.");
                 exchangeRate.current.rate = 0.92;
             }
-        } else {
-            return;
         }
     }
 
