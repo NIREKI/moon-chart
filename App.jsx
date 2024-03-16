@@ -492,6 +492,7 @@ export function HomeScreen({ route, navigation }) {
                                     return (
                                         <TouchableOpacity
                                             onLongPress={() => {
+                                                Vibration.vibrate(50);
                                                 itemToDelete.current.id =
                                                     item.item.id;
                                                 itemToDelete.current.type =
@@ -513,6 +514,7 @@ export function HomeScreen({ route, navigation }) {
                                     return (
                                         <TouchableOpacity
                                             onLongPress={() => {
+                                                Vibration.vibrate(50);
                                                 itemToDelete.current.id =
                                                     item.item.id;
                                                 itemToDelete.current.type =
