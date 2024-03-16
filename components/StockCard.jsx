@@ -16,7 +16,6 @@ import Graph from "./Graph.jsx";
 var width = Dimensions.get("window").width;
 
 export default function StockCard({ share_object, getHistory, promiseQueue }) {
-    const data = [180, 180.6, 178, 177, 176, 170, 186];
     const [expanded, setExpanded] = useState(false);
     const [status, setStatus] = useState("");
 

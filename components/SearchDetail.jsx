@@ -73,7 +73,7 @@ export default function SearchDetail({ route, navigation }) {
                                     <SvgUri
                                         width={70}
                                         height={70}
-                                        uri={info.logo}
+                                        uri={info.icon}
                                     />
                                 </View>
                             </View>
@@ -273,7 +273,7 @@ export default function SearchDetail({ route, navigation }) {
                 prevClose: priceData.pc,
                 industry: data.finnhubIndustry,
                 ipo: data.ipo,
-                logo: data.logo,
+                icon: data.logo,
                 name: data.name,
                 ticker: data.ticker,
                 country: data.country,

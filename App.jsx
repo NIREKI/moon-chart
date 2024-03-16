@@ -32,6 +32,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Search from "./components/Search.jsx";
 import Queue from "promise-queue";
 import SearchDetail from "./components/SearchDetail.jsx";
+import CryptoCard from "./components/CryptoCard.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
@@ -63,24 +64,24 @@ export function HomeScreen({ route, navigation }) {
             historyStatus: "loading",
             history: [],
         },
-        {
-            id: "AAPL",
-            name: "Apple Inc",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
-        {
-            id: "MSFT",
-            name: "Microsoft Corp",
-            type: "stock",
-            value: 0,
-            valueStatus: "loading",
-            historyStatus: "loading",
-            history: [],
-        },
+        // {
+        //     id: "AAPL",
+        //     name: "Apple Inc",
+        //     type: "stock",
+        //     value: 0,
+        //     valueStatus: "loading",
+        //     historyStatus: "loading",
+        //     history: [],
+        // },
+        // {
+        //     id: "MSFT",
+        //     name: "Microsoft Corp",
+        //     type: "stock",
+        //     value: 0,
+        //     valueStatus: "loading",
+        //     historyStatus: "loading",
+        //     history: [],
+        // },
     ]);
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
@@ -297,7 +298,7 @@ export function HomeScreen({ route, navigation }) {
                         info = {
                             industry: infoData.finnhubIndustry,
                             ipo: infoData.ipo,
-                            logo: infoData.logo,
+                            icon: infoData.logo,
                             name: infoData.name,
                             ticker: infoData.ticker,
                             country: infoData.country,
@@ -317,7 +318,18 @@ export function HomeScreen({ route, navigation }) {
                                         ).toFixed(2),
                                         valueStatus: "fetched",
                                         infoStatus: "fetched",
-                                        info: info,
+                                        info: {
+                                            ...info,
+                                            percentChange: data.dp,
+                                            high_24h: data.h,
+                                            prevClose: data.pc,
+                                            currentPrice:
+                                                data.c *
+                                                (
+                                                    <exchangeRate className="current rate"></exchangeRate>
+                                                ),
+                                            data,
+                                        },
                                     };
                                 } else {
                                     return stock;
@@ -360,11 +372,18 @@ export function HomeScreen({ route, navigation }) {
                     numColumns={1}
                     data={shareList}
                     renderItem={(shareObject) => (
-                        <StockCard
-                            share_object={shareObject.item}
-                            getHistory={getHistory}
-                            promiseQueue={queue}
-                        />
+                        <>
+                            {/* <StockCard
+                                share_object={shareObject.item}
+                                getHistory={getHistory}
+                                promiseQueue={queue}
+                            /> */}
+                            <CryptoCard
+                                cryptoObject={shareObject.item}
+                                getHistory={getHistory}
+                                promiseQueue={queue}
+                            />
+                        </>
                     )}
                     keyExtractor={(shareObject) => shareObject.id}
                 />
