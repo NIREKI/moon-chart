@@ -53,6 +53,10 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
         } else if (stockObject.historyStatus === "fetched") {
             setHistoryStatus("fetched");
         }
+        // fix for pull to refresh
+        if (expanded && stockObject.historyStatus === "loading") {
+            toggleExpanded();
+        }
     }, [stockObject]);
 
     return (

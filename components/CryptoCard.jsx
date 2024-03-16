@@ -52,6 +52,10 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
         } else if (cryptoObject.historyStatus === "fetched") {
             setHistoryStatus("fetched");
         }
+        // fix for pull to refresh
+        if (expanded && cryptoObject.historyStatus === "loading") {
+            toggleExpanded();
+        }
     }, [cryptoObject]);
 
     return (
