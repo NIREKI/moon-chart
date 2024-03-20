@@ -15,7 +15,7 @@ import {
     Vibration,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { AntDesign } from "@expo/vector-icons";
 import StockCard from "./components/StockCard.jsx";
 import Colors from "./Colors.jsx";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -44,6 +44,7 @@ import CryptoCard from "./components/CryptoCard.jsx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ConfirmDialog, Dialog } from "react-native-simple-dialogs";
 import Banner from "./components/Banner.jsx";
+import Information from "./components/Information.jsx";
 
 const Stack = createNativeStackNavigator();
 // debug mode: No API Fetches
@@ -346,14 +347,15 @@ export function HomeScreen({ route, navigation }) {
                                             info: {
                                                 ...info,
                                                 percentChange: data.dp,
-                                                high_24h: data.h,
-                                                prevClose: data.pc,
+                                                high_24h:
+                                                    data.h *
+                                                    exchangeRate.current.rate,
+                                                prevClose:
+                                                    data.pc *
+                                                    exchangeRate.current.rate,
                                                 currentPrice:
                                                     data.c *
-                                                    (
-                                                        <exchangeRate className="current rate"></exchangeRate>
-                                                    ),
-                                                data,
+                                                    exchangeRate.current.rate,
                                             },
                                         };
                                     } else {
@@ -464,7 +466,21 @@ export function HomeScreen({ route, navigation }) {
                     onPress: () => setDialog(false),
                 }}
             />
-            <Text style={styles.header}>MoonChart</Text>
+            <View
+                style={{
+                    justifyContent: "space-between",
+                    flexDirection: "row",
+                    backgroundColor: "#fff",
+                }}
+            >
+                <Text style={styles.header}>MoonChart</Text>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate("Information")}
+                    style={styles.info}
+                >
+                    <AntDesign name="infocirlceo" size={30} color="black" />
+                </TouchableOpacity>
+            </View>
             <View style={styles.container}>
                 {shareListData.current.length === 0 && (
                     <Banner
@@ -583,6 +599,11 @@ export default function App() {
                     component={SearchDetail}
                     options={{ title: "Details" }}
                 />
+                <Stack.Screen
+                    name="Information"
+                    component={Information}
+                    options={{ title: "Informationen" }}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     );
@@ -605,6 +626,11 @@ const styles = StyleSheet.create({
         color: "#000",
         textAlign: "left",
         backgroundColor: "#fff",
+    },
+    info: {
+        paddingTop: 50,
+        paddingRight: 10,
+        paddingBottom: 20,
     },
     floatingSearchButton: {
         flexDirection: "row",
