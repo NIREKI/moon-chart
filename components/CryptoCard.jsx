@@ -83,12 +83,14 @@ export default function CryptoCard({ cryptoObject, getHistory, promiseQueue }) {
             {valueStatus === "fetched" && infoStatus === "fetched" && (
                 <View style={styles.baseContainer}>
                     <View style={styles.baseData}>
-                        <Image
-                            source={{
-                                uri: cryptoObject.info.icon,
-                            }}
-                            style={styles.iconContainer}
-                        />
+                        <View stlye={styles.iconContainer}>
+                            <Image
+                                source={{
+                                    uri: cryptoObject.info.icon,
+                                }}
+                                style={styles.iconContainer}
+                            />
+                        </View>
                         <View>
                             <Text style={styles.name}>{cryptoObject.name}</Text>
                             <Text style={styles.symbol}>
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     },
     baseData: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         width: (width / 100) * 45,
     },
     name: {

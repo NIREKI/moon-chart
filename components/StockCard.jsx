@@ -84,14 +84,12 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
             {valueStatus === "fetched" && infoStatus === "fetched" && (
                 <View style={styles.baseContainer}>
                     <View style={styles.baseData}>
-                        <View style={styles.iconContainer}>
-                            <Image
-                                source={{
-                                    uri: stockObject.info.icon,
-                                }}
-                                style={styles.iconContainer}
-                            />
-                        </View>
+                        <Image
+                            source={{
+                                uri: stockObject.info.icon,
+                            }}
+                            style={styles.iconContainer}
+                        />
                         <View>
                             <Text style={styles.name}>{stockObject.name}</Text>
                             <Text style={styles.symbol}>
