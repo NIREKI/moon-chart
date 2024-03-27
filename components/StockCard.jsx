@@ -26,6 +26,7 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
     const toggleExpanded = () => {
         // Only fetches the history if it hasn't been fetched yet and only when the user expands the card and thus shows the graph.
         if (stockObject.historyStatus === "loading") {
+            // Using a promise queue to ensure that only one data entry gets fetched at a time.
             promiseQueue.add(function () {
                 return getHistory({
                     id: stockObject.id,
@@ -42,7 +43,6 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
         } else if (stockObject.valueStatus === "fetched") {
             setValueStatus("fetched");
         }
-
         if (stockObject.infoStatus === "loading") {
             setInfoStatus("loading");
         } else if (stockObject.infoStatus === "fetched") {
@@ -85,10 +85,11 @@ export default function StockCard({ stockObject, getHistory, promiseQueue }) {
                 <View style={styles.baseContainer}>
                     <View style={styles.baseData}>
                         <View style={styles.iconContainer}>
-                            <SvgUri
-                                uri={stockObject.info.icon}
-                                width={styles.iconContainer.width}
-                                height={styles.iconContainer.height}
+                            <Image
+                                source={{
+                                    uri: stockObject.info.icon,
+                                }}
+                                style={styles.iconContainer}
                             />
                         </View>
                         <View>
