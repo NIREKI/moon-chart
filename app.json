@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "moon-chart",
-        "slug": "moon-chart",
+        "name": "MoonCHART",
+        "slug": "MoonCHART",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/icon.png",
@@ -9,7 +9,7 @@
         "splash": {
             "image": "./assets/splash.png",
             "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
+            "backgroundColor": "#000"
         },
         "assetBundlePatterns": ["**/*"],
         "ios": {

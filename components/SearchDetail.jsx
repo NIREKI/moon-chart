@@ -10,8 +10,11 @@ import { useEffect, useState } from "react";
 import { getCryptoInformation } from "../scripts/crypto.js";
 import { SvgUri } from "react-native-svg";
 import AnimatedLoader from "react-native-animated-loader";
+
+const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 /**
- * This Comopnent shows a detail page for the selected stock or crypto item in the search list.
+ * This Comoponent shows a detail page for the selected stock or crypto item in the search list.
  * It then checks if the item is a stock or crypto and then fetches mission data accordingly.
  *
  * Props have to be passed like navivation.navigate('SearchDetail', { item: item })
@@ -19,9 +22,6 @@ import AnimatedLoader from "react-native-animated-loader";
  * @param {{ route, navigation }} param0 for handling navigation and getting the passed props
  * @returns
  */
-
-const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
 export default function SearchDetail({ route, navigation }) {
     const [info, setInfo] = useState();
     let item = route.params.item;

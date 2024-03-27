@@ -3,6 +3,13 @@ import { Svg } from "react-native-svg";
 import Markdown from "react-native-markdown-display";
 var width = Dimensions.get("window").width;
 var height = Dimensions.get("window").height;
+/**
+ * Generates a view containing information about MoonChart.
+ *
+ * @param {string} route - The route for navigation
+ * @param {object} navigation - The navigation object
+ * @return {JSX.Element} A view with information about MoonChart
+ */
 export default function Information(route, navigation) {
     return (
         <View style={styles.container}>

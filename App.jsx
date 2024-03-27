@@ -248,19 +248,20 @@ export function HomeScreen({ route, navigation }) {
         // First be sure that a correct exchange rate is already set.
         await getExchangeRate();
         await AsyncStorage.getItem("shareList")
-            .then(
-                (res) =>
-                    (shareListData.current = JSON.parse(res).map((item) => {
+            .then((res) => {
+                if (JSON.parse(res).length > 0) {
+                    shareListData.current = JSON.parse(res).map((item) => {
                         return {
                             ...item,
                             valueStatus: "loading",
                             infoStatus: "loading",
                             historyStatus: "loading",
                         };
-                    }))
-            )
+                    });
+                }
+            })
             .then(async () => {
-                if (shareListData.current) {
+                if (shareListData.current.length > 0) {
                     let id;
                     for (let i = 0; i < shareListData.current.length; i++) {
                         id = shareListData.current[i].id;
@@ -394,6 +395,7 @@ export function HomeScreen({ route, navigation }) {
             );
         }
     }
+    /**Gets executed when the route changes, which is used after adding an item */
     useEffect(() => {
         if (route.params) {
             if (route.params.add) {
@@ -417,6 +419,7 @@ export function HomeScreen({ route, navigation }) {
             getValueData().then(() => setRefreshing(false));
         }
     }, [refreshing]);
+    /** Gets executed on app startup */
     useEffect(() => {
         if (debug) {
             getExchangeRate();
