@@ -502,7 +502,10 @@ export function HomeScreen({ route, navigation }) {
                             refreshControl={
                                 <RefreshControl
                                     refreshing={refreshing}
-                                    onRefresh={() => setRefreshing(true)}
+                                    onRefresh={() => {
+                                        Vibration.vibrate(50);
+                                        setRefreshing(true);
+                                    }}
                                 />
                             }
                             renderItem={(item) => {
