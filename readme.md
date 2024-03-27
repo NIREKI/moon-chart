@@ -37,7 +37,7 @@
 <h3 align="center">MoonCHART - track your favorite stock and crypto symbols</h3>
 
   <p align="center">
-    <b>MoonCHART</b> is an open source mobile app for tracking the stock and crypto-currency market. Add your favorite <b>stock symbols</b> and <b>crypto currencies</b> and gather <i>live</i> and <i>historical</i> market data. MoonCHART currently officially only supports the android platform.
+    <b>MoonCHART</b> is an open source mobile app for tracking the stock and cryptocurrency market. Add your favorite <b>stock symbols</b> and <b>crypto currencies</b> and gather <i>live</i> and <i>historical</i> market data. <b>MoonCHART</b> currently only supports android devices and only has German language localization.
     <br />
     <br />
     <a href="https://github.com/NIREKI/moon-chart"><strong>Explore the docs »</strong></a>
@@ -101,7 +101,9 @@ MoonCHART was developed as part of my CS degree program with simplicity and to t
 </li>
 <li>
   Quickly search for availble stocks in the <b>Nasdaq market</b> and available crypto currencies on <a href="https://www.coingecko.com/">CoinGecko</a> in one go<br>
-  <details><summary>Screenshot</summary><img src="https://github.com/NIREKI/moon-chart/assets/46166944/ddec8e0f-5fca-4d76-a2f0-342d39c9b232" width=20%></details>  
+  <details><summary>Screenshot (Search Results)</summary><img src="https://github.com/NIREKI/moon-chart/assets/46166944/ddec8e0f-5fca-4d76-a2f0-342d39c9b232" width=20%></details>
+  <details><summary>Screenshot (Result Details)</summary><img src="https://github.com/NIREKI/moon-chart/assets/46166944/e6c39f82-722f-45b2-813d-1f70b5210157" width=20%></details>  
+
 </li>
 <li>
   Long-press added symbols for deleting them<br>
