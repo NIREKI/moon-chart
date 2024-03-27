@@ -69,10 +69,11 @@ export default function SearchDetail({ route, navigation }) {
                                     )}
                                 </View>
                                 <View style={styles.iconContainer}>
-                                    <SvgUri
-                                        width={70}
-                                        height={70}
-                                        uri={info.icon}
+                                    <Image
+                                        source={{
+                                            uri: info.icon,
+                                        }}
+                                        style={{ width: 50, height: 50 }}
                                     />
                                 </View>
                             </View>
