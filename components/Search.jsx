@@ -109,7 +109,7 @@ export default function Search({ route, navigation }) {
                                     //check if there is already an element with the type "Aktien"
                                     setResults(response, setShowList(true));
                                 } else {
-                                    setResults([]);
+                                    setResults([], setShowList(true));
                                 }
                             } else {
                                 setShowList(false, setResults([]));
