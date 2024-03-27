@@ -103,7 +103,7 @@ export default function Search({ route, navigation }) {
                             if (text.length > 2) {
                                 const response = getSearchResults({
                                     query: text,
-                                    limit: 10,
+                                    limit: 30,
                                 });
                                 if (response.length > 0) {
                                     //check if there is already an element with the type "Aktien"
