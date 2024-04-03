@@ -149,9 +149,8 @@ First, check if you meet these prerequisites:
 2. Enter API Keys into `example.env` and rename `example.env` to `.env`
 3. Install NPM packages
    ```sh
-   npm install --force
+   npm install --save
    ```
-   It's neccessary to use `--force` because of incompatible dependencies between `react-native-svg` and `react-native-svg-charts`, see [this GitHub Issue](https://github.com/JesperLekland/react-native-svg-charts/issues/608). 
 4. Startup the app with `npx expo start`. Please note that the app currently only supports android devices.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
