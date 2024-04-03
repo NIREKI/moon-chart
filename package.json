@@ -37,5 +37,8 @@
     "devDependencies": {
         "@babel/core": "^7.20.0"
     },
+    "overrides": {
+        "react-native-svg": "^14.1.0"
+    },
     "private": true
 }
