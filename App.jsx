@@ -61,6 +61,11 @@ export function HomeScreen({ route, navigation }) {
     const [dialog, setDialog] = useState(false);
     const shareListData = useRef([]);
     const itemToDelete = useRef({ id: null, type: null, name: null });
+    /**
+     * A function that adds an item to the homescreen by adding it ot the shareList state if it is not a duplicate.
+     *
+     * @param {Object} itemID, itemName, itemType, itemInfo[]
+     */
     async function addToHomescreen({ itemId, itemName, itemType, itemInfo }) {
         let duplicate = false;
 
@@ -130,8 +135,13 @@ export function HomeScreen({ route, navigation }) {
             }
         }
     }
+
+    /**
+     * Asynchronously retrieves the exchange rate data.
+     *
+     * @return {rate:, timestamp:}
+     */
     async function getExchangeRate() {
-        // TODO: Save exchange rate in local storage and check if the timestamp is more than 24 hours old before fetching new data.
         try {
             let data = parseFloat(await AsyncStorage.getItem("exchangeRate"));
             const timestamp = parseInt(

@@ -32,7 +32,6 @@ export default function Banner({ color, header, content }) {
             <View style={styles.content}>
                 <Markdown>{content}</Markdown>
             </View>
-            {/* <Text style={styles.content}>{content}</Text> */}
         </View>
     );
 }

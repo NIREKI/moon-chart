@@ -4,6 +4,7 @@ import { Path } from "react-native-svg";
 import * as shape from "d3-shape";
 import Colors from "../Colors.jsx";
 
+// Returns a graph with the given data array
 export default function Graph({ object, width, height }) {
     const Line = ({ line }) => (
         <Path
