@@ -152,13 +152,19 @@ export async function getStockHistory( {symbol, exchangeRate} ){
         }
     });
     if(debugAPI){
+        console.log("https://api.polygon.io/v2/aggs/ticker/" + symbol + "/range/10/minute/" + yesterday + "/" + today +"?adjusted=true&sort=asc&limit=5000&apiKey=" + key);
+        console.log(symbol, exchangeRate);
         console.log("Stock history: ", res.status);
     }
-    if(res.status === 429){
+    if(res.status !== 200){
         // TODO: Handle too many requests error. Only 5 requests per minute allowed.
-        return null;
+
+        return [{timestamp: 0, price: 0}, {timestamp: 1, price: 1}];
     } else if (res.status === 200){
         const jsonData = await res.json();
+        if(debugAPI){
+            console.log(jsonData);            
+        }
         const filteredResults = jsonData.results.map((item) => ({timestamp: item.t, price: item.vw * exchangeRate}));
         return filteredResults;
     }
@@ -171,7 +177,12 @@ export async function getStockHistory( {symbol, exchangeRate} ){
      * @return {string} The formatted date string
      */
 function getTodaysDate() {
+    // If todays day is monday or sunday, get last saturdays date
     const today = new Date();
+    console.log(today.getDay());
+    if (today.getDay() === 0 || today.getDay() === 1) {
+        today.setDate(6)
+    }
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
@@ -183,8 +194,14 @@ function getTodaysDate() {
  * @return {string} The formatted yesterday's date
  */
 function getYesterdaysDate() {
+    //If todays day is monday or sunday, get last fridays date
+    const today = new Date();
     const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    if (today.getDay() === 0 || today.getDay() === 1) {
+        yesterday.setDate(5)
+    } else {
+        yesterday.setDate(yesterday.getDate() - 1);
+    }
     const year = yesterday.getFullYear();
     const month = String(yesterday.getMonth() + 1).padStart(2, '0');
     const day = String(yesterday.getDate()).padStart(2, '0');
